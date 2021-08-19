@@ -1,0 +1,103 @@
+%%
+%% Beuth Hochschule für Technik --  Abschlussarbeit
+%%
+%% Hauptdokument
+%%
+%% 23.01.09 Tschirley V.01
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[11pt, a4paper]{book}
+%% Übersetzen als Entwurf
+%\usepackage[entwurf]{bhtThesis}
+%% Übersetzen für die Abgabe
+\usepackage[abgabe]{bhtThesis}
+\typeout{BHT-Abschlussarbeit V.02 15.02.12 S.Tschirley}
+
+\usepackage{blindtext}   %für Blindtext in Kapitel 2
+\usepackage{listings}
+\usepackage{url}  % added by E.S
+\usepackage{hyperref}
+\usepackage{filecontents}
+
+\lstset{ 
+  literate={ö}{{\"o}}1
+           {ä}{{\"a}}1
+           {ü}{{\"u}}1
+           {Ö}{{\"O}}1
+           {Ä}{{\"A}}1
+           {Ü}{{\"U}}1
+           {ß}{{\ss}}1
+}
+%%\usepackage{hyperref}
+
+%%
+%% Es folgen einige Zusätze, die in Kapitel 1 beschrieben sind. 
+%% Alles was nicht notwendig ist, kann auskommentiert werden
+%%
+\usepackage{trsym}
+%\usepackage{showkeys}
+\usepackage{bytefield}
+
+%%
+%% Pfad zu den Bildern
+%%
+\graphicspath{
+  {media/pictures/}
+}
+
+%%
+%% Einbinden persönlicher macros 
+%%
+\input{personalMacros.tex}
+
+%% Message
+\typeout{-----------------------------------------------------------}
+\typeout{----> main.tex ---- Zentrales Dokument---------------------}
+\typeout{-----------------------------------------------------------}
+
+\version{0.1$\alpha$}
+\datum{\today}
+%%
+%% Titel, Autor und Betreuer
+%%
+\fachbereich{VII -- Elektrotechnik  --} 
+\studiengang{Elektronik und Kommunikationssysteme}
+\autor{Emile Schons 903606}
+%\edvnr{123 456}
+\titel{Projekt-Labor: Automatisierungssysteme} 
+\untertitel{SS2021}
+\betreuerFeld{
+  \begin{tabular}{lr}
+    \multicolumn{2}{l}{\textbf{Gutachter}}\\
+    {Gutachter1}& Beuth Hochschule für Technik
+  \end{tabular}
+}
+
+%%\renewcommand{\baselinestretch}{1.05} 
+\newbox\bwk\edef\tempd#1pt{#1\string p\string t}\tempd\def\nbextr#1pt{#1}
+\def\npts#1{\expandafter\nbextr\the#1\space}
+\def\ttwplink#1#2{\special{ps:1 0 0 setrgbcolor}#2\special{ps:0 0 0 setrgbcolor}\setbox\bwk=\hbox{#2}\special{ps:( linkto #1)\space\npts{\wd\bwk} \npts{\dp\bwk} -\npts{\ht\bwk} true\space Cpos}}
+\begin{document}
+\pagestyle{fancy}
+
+\input{titelseiten.tex}
+
+\pagenumbering{arabic}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Die Kapitel der Arbeitw
+
+\input{A_Introduction.tex}
+%\input{kapitel2/ch2.tex}
+
+\begin{appendix}
+  \input{anhang.tex}
+\end{appendix}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Literaturverzeichnis
+
+\clearpage\newpage
+\addcontentsline{toc}{chapter}{Literatur- und Quellenverzeichnis}
+\bibliographystyle{myapalike}
+\bibliography{bhtThesis}
+
+\end{document}

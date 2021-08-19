@@ -1,9 +1,51 @@
 %%
-%% Beuth Hochschule für Technik --  Abschlussarbeit
+%% Beuth Hochschule für Technik --  Projektarbeit/Projekt-Labor
 %%
 %% Kapitel 1
 %%
 %%
 
-\chapter{Erster Abschnitt}
+\chapter{Introduction}
 
+(4d) (mostly offline)
+
+
+\section{why Kalman, why EKF????}
+
+
+\chapter{Implementation}
+
+
+
+\section{Hardware Setup for validation}
+
+\section{EKF Implementation}
+date: (4d)
+
+
+
+\subsection{Definition Mathematics Equations }
+ 
+Describe Model equation: 
+Make a diagram where you can see the input output and steps
+-State equation f() (input: measured current and time-period -> Coulomb Counting)
+-Measurement equation h(), input (measured voltage, OCV lookup table, current if the correction with a Enhanced Self-Correcting (ESC) Cell Model /ECM) -> output SOC)
+equation should be use standard letters: filterpy, wikipedia, gregoryPlett, Step by Step Guide
+
+\section{Kalman-SOC}
+A Fork of Okra-Solar Algorithm. \
+
+Features: \
+
+-Works without the input of a Equivalent Circuit Model (ECM) specific to the physical battery, which would need to be parameterized doing advanced measurements during charging and discharging of the battery. 
+
+-Inputs: Current and Voltage Measurements and OCV Lookup Table
+
+-Outputs: SOC in \%Wh
+
+TODO Discuss the Code Snippets? But Some Code in Appendix or reference Github Repo only? 
+\chapter{Validation}
+
+Integrated matplotlib inline with pythontex
+
+Discuss results.  (4d)
