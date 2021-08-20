@@ -26,10 +26,44 @@ date: (4d)
 
 \subsection{Definition Mathematics Equations }
  
-Describe Model equation: 
-Make a diagram where you can see the input output and steps
--State equation f() (input: measured current and time-period -> Coulomb Counting)
--Measurement equation h(), input (measured voltage, OCV lookup table, current if the correction with a Enhanced Self-Correcting (ESC) Cell Model /ECM) -> output SOC)
+TODO Make a diagram where you can see the input output and steps\\
+
+%\begin{equation}
+%\end{equation}	
+
+Most general form of  state observer equations: \\
+$ x_{k+1}=Ax_{k}+Bu_{k} $ (state observer equation) \\
+$ y_{k}=Cx_{k}+Du_{k} $ \ \ \  (output equation)\\ 
+
+$u_{k} \equiv i_{k}$ a control vector (input), defined as the measurement of current through the battery at time $k$. \\ 
+$y_{k} \equiv v_{k}$ an observation (or measurement), defined as a voltage measurement of the battery at time $k$. \\
+$A = I$  identity matrix f.i $I_{2}=\begin{bmatrix}1&0\\0&1\end{bmatrix}$ \\
+$B = \begin{bmatrix}-\frac{\Delta t}{{Q_{C}}}&0\\0&1\end{bmatrix} $  is the control-input model, deduced from  $f({\boldsymbol {x}}_{k},{\boldsymbol {i}}_{k},\Delta t) =  {x}_{k} - \frac{1}{{Q_{C}}}\int_{0}^{\Delta t} {i_{k}\ dk} $
+
+
+
+Most general form of Kalman Filter equations: \\
+
+$  {\boldsymbol {x}}_{k+1}=f({\boldsymbol {x}}_{k},{\boldsymbol {u}}_{k})+ {\boldsymbol {w}}_{k} $ \ (State Space equation)  \\
+$  {\boldsymbol  {z}}_{{k}}=h({\boldsymbol  {x}}_{{k}})+{\boldsymbol  {v}}_{{k}} $ \ \ \ \ \ \ \ \ \ \ \  \ (Output equation)  \\
+
+
+$ {\hat  {x}}_{k+1}=\left(A-BK\right){\hat  {x}}_{k}+L\left(y_{k}-{\hat  {y}}_{k}\right) $  ( here $u_{k}$ seems missing)\\
+
+Predicted variables $ \hat{y}_{k}$ and $ \hat{x}_{k} $  are commonly denoted by a "hat" to distinguish them from  $ {y}_{k} $ and $ {x}(k) $  of the physical system. As the state of charge (SOC) denoted as $\hat{x}_{k} = SOC_{k}$  cannot be measured directly it is always a predicted variable, opposed to ${y}(k)$, which is the measured circuit voltage. Consequently $ \hat{y}_{k} = {v}_{k} $ is the predicted circuit voltage also known as measurable output: 
+
+$ {\hat{y}}_{k}=\left(C-DK\right){\hat{x}}_{k} $ 
+
+Input to the extend kalman filter (EKF) is current and voltage measurement and the period of time between these measurements. The initialization of the EKF outputs the initial estimate state of charge  ${x}_{k|k=0} $ another input to the EKF. 
+
+{System's dynamic model} \\
+The $f() $ function is defined as the $ f({\boldsymbol {x}}_{k},{\boldsymbol {i}}_{k},t) = {x}_{k} - \frac{1}{{Q_{C}}}\int_{0}^{t} {i_{k}\ dk} $, thus current measurement $ {i}_{k} $ 
+The $h({\boldsymbol {x}}_{{k}})$ function is defined as the OCV lookup table. A general OCV lookup table for the battery chemistry can be used or for better results a specific OCV lookup established by offline measurements for  the given battery should be used. 
+To further improve the OCV prediction a correction of it can be performed by a equivalent circuit model (ECM) of the battery feeded by the current measurement used to predict the SOC: 
+$ {v}_{k} = {D} \ {OCV}({z}_{k}) + C {x}_{k}  +  D {i}_{k}  $ 
+with $ C = [0, -R_1, -R_2, ..., M] $ and $ D = R_0 $
+
+-Measurement equation, input (measured voltage, OCV lookup table, current if the correction with a Enhanced Self-Correcting (ESC) Cell Model /ECM) -> output SOC)
 equation should be use standard letters: filterpy, wikipedia, gregoryPlett, Step by Step Guide
 
 \section{Kalman-SOC}

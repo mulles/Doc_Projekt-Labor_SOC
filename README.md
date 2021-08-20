@@ -7,8 +7,11 @@ This document describes the research, implementation and verification of an embe
 
 ** Build/Compile the Latex document **
 
+Linux: 
 'git clone https://github.com/mulles/Doc_Projekt-Labor_SOC
 cd Doc_Projekt-Labor_SOC
 make'
+
+Or with TeXStudio a Latex IDE 
 
 COULDDO Add continous integration to build on remote machine aka server
