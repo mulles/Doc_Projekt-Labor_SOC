@@ -35,6 +35,30 @@ Particulary challenging is the parametrization, which is typically done offline*
 When simple observation and control-input models are used as in the okra kalman-soc algo, the parametrisation might be much easier? TODO to check if the only parameters OCV(SOC) data can be used generally or only on the batteries they have been measured on. 
 
 
+Offline parametrization 
+
+Quote: "As a result, many experimental pretests investigating the
+effects of the internal and external conditions of a battery on its parameters are required, since the
+accuracy of state estimation depends on the quality of the information regarding battery parameter
+changes"
+
+\cite{xia2018online}
+
+"Therefore, some tests data must be available in 
+advance to find the parameters of these models." 
+---An Overview of Generic Battery Models  \\
+
+
+Gregory Plett says: 
+"Two possible approaches: \\
+
+
+First, an algorithm might somehow adapt the parameter values of the model during operation to match presently observed current–voltage behaviors; but, this \textbf{must be done very carefully to avoid making the model unstable or physically nonmeaningful}. \\
+
+Alternately, a set of models could be pre-computed at different feasible aging points and the model from this set that most closely predicts presently observed current–voltage dynamics could be selected from the set. This second approach guarantees stable and physically meaningful models since all models in the pre-computed set meet these criteria. We propose such an approach here." 
+---https://www.sciencedirect.com/science/article/abs/pii/S2352152X18301385?via%3Dihub
+In order to have online first algo, the parametrization needs to be done online!. 
+
 As the OCV curve is non-linear the kalman filter can not be used. 
 
 state transition and observation models
@@ -118,7 +142,7 @@ TODO Discuss the Code Snippets? But Some Code in Appendix or reference Github Re
 \chapter{Validation}
 
 Integrated matplotlib inline with pythontex
-
+ 
 Discuss results.  (4d)
 
 \chapter{Outlook}
