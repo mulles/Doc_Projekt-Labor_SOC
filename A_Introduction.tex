@@ -9,10 +9,78 @@
 
 (4d) (mostly offline)
 
+sudo apt install texlive-lang-german
+
+\section{Python Code within Latex} 
+\label{K1_Python in Latex}
+%pdflatex -synctex=1 -interaction=nonstopmode %.tex pythontex --interpreter python:python3 main.tex pdflatex -synctex=1 -interaction=nonstopmode %.tex
+%http://tug.ctan.org/macros/latex/contrib/pythontex/pythontex_gallery.pdf
+
+\begin{pycode}
+
+print("Python says ``Hello we got it running finally!! YEahjjjjjjo ''")
+
+\end{pycode}
+
+\begin{pyconsole}
+x = 250
+x = x*2
+y = 5
+\end{pyconsole}
+
+
+The variable is $x=\pycon{x}$
+The Result of y*2 is $y=\pycon{y}$
+
+
+\subsection{Integrated matplotlib inline with pythontex}
+%If you want to run the code, but don't want to show it, use the \verb+pycode+ environment.
+ 
+
+\begin{pylabcode}[plotsession]
+rc('text', usetex=True)
+rc('font', **{'family':'serif', 'serif':['Times']})
+rc('font', size=10.0)
+rc('legend', fontsize=10.0)
+x = linspace(0, 3*pi)
+figure(figsize=(3.25,2))
+plot(x, sin(x), label='$\sin(x)$')
+plot(x, sin(x)**2, label='$\sin^2(x)$',
+linestyle='dashed')
+xlabel(r'$x$-axis')
+ylabel(r'$y$-axis')
+xticks(arange(0, 4*pi, pi), ('$0$',
+'$\pi$', '$2\pi$', '$3\pi$'))
+axis([0, 3*pi, -1, 1])
+legend(loc='lower right')
+savefig('myplot.pdf', bbox_inches='tight')
+\end{pylabcode}
+
+\begin{figure}
+\centering
+\includegraphics{myplot}
+\caption{\label{fig:matplotlib} A plot
+created with PythonTeX and Matplotlib}
+\end{figure}
+
+\begin{pylabcode}
+import plotly.express as px
+
+df = px.data.gapminder().query("continent=='Oceania'")
+fig = px.line(df, x="year", y="lifeExp", color='country')
+fig.write_image("plotly.pdf")
+\end{pylabcode}
+
+\begin{figure}
+\centering
+\includegraphics{plotly}
+\caption{\label{fig:matplotlib} A plot
+created with PythonTeX and Plotly}
+\end{figure}
 
 \section{why Kalman, why EKF????}
 
-Other methods based on  auto regressive exogenous (ARX) model
+Other methods are based on auto regressive exogenous (ARX) model or a combination of it and the Kalman Filter.
 
 
 \chapter{Implementation}
@@ -29,24 +97,29 @@ To design an extended kalman filter algorithm three steps are necessary:
 2.The constants inside the models expressed as matrixes need to be definied, which is as well known as parametrisation of the model.  
 3.The model needs to be implemented as code running on embedded systems. 
 
-The key to success for a good SOC is a good definition of both models and a good parametrisation. The implementation is independent of the use case and depends on the skills of the programmer, in his  hands lies the optimization of the  code. In case no FPU is available on the micro-controller unit (MCU) fix point arithmetic might be an option.  
+The key to success for a good SoC is a good definition of both models and a good parametrisation. The implementation is independent of the use case and depends on the skills of the programmer, in his  hands lies the optimization of the  code. In case no FPU is available on the micro-controller unit (MCU) fix point arithmetic might be an option.  
 
-Particulary challenging is the parametrization, which is typically done offline* and required quite advanced equipment. Adaptive extend Kalman Filter is an option where the parameters are determined online, but still AEKF needs to be initialized with parameters not necessary fitting all batteries of a given chemistry (different capacities, different manufacturer). TODO It needs to be researched if it only affects the convergence time or if convergence is not reached at all?  A further advantage of an adaptive filter is that the state of health (SOH) can be determined along the side. 
-When simple observation and control-input models are used as in the okra kalman-soc algo, the parametrisation might be much easier? TODO to check if the only parameters OCV(SOC) data can be used generally or only on the batteries they have been measured on. 
+Particulary challenging is the parametrization, which is typically done offline \footnote{not done on the microcomtroller unit (MCU) the algorithm is deployed to, thus not on the system running the final algorithm. Offline means on more advanced hardware, which is not available in the final product. See \url{https://en.wikipedia.org/wiki/Online_model} } and required quite advanced equipment. Adaptive extend Kalman Filter is an option where the parameters are determined online, but still AEKF needs to be initialized with parameters not necessary fitting all batteries of a given chemistry (different capacities, different manufacturer). TODO It needs to be researched if it only affects the convergence time or if convergence is not reached at all?  A further advantage of an adaptive filter is that the state of health (SOH) can be determined along the side. 
+When simple observation and control-input models are used as in the okra kalman-soc algo, the parametrisation might be much easier? TODO to check if the only parameters OCV(SoC) data can be used generally or only on the batteries they have been measured on. 
 
 
-Offline parametrization 
+Offline parametrizatio: 
 
 Quote: "As a result, many experimental pretests investigating the
 effects of the internal and external conditions of a battery on its parameters are required, since the
 accuracy of state estimation depends on the quality of the information regarding battery parameter
 changes"
 
-\cite{xia2018online}
+
 
 "Therefore, some tests data must be available in 
-advance to find the parameters of these models." 
----An Overview of Generic Battery Models  \\
+advance to find the parameters of these models."
+\cite{hussein2011overview}  \\
+
+ 
+
+
+
 
 
 Gregory Plett says: 
@@ -63,9 +136,6 @@ As the OCV curve is non-linear the kalman filter can not be used.
 
 state transition and observation models
 
-
-
-* TODO implement foot note -> not done on the MCU the algo is deployed to, not on the system running the final algo. 
 
 \subsection{Definition Mathematics Equations }
  
@@ -94,40 +164,57 @@ $  {\boldsymbol  {z}}_{{k}}=h({\boldsymbol  {x}}_{{k}})+{\boldsymbol  {v}}_{{k}}
 
 $ {\hat  {x}}_{k+1}=\left(A-BK\right){\hat  {x}}_{k}+L\left(y_{k}-{\hat  {y}}_{k}\right) $  ( here $u_{k}$ seems missing)\\
 
-Predicted variables $ \hat{y}_{k}$ and $ \hat{x}_{k} $  are commonly denoted by a "hat" to distinguish them from  $ {y}_{k} $ and $ {x}(k) $  of the physical system. As the state of charge (SOC) denoted as $\hat{x}_{k} = SOC_{k}$  cannot be measured directly it is always a predicted variable, opposed to ${y}(k)$, which is the measured circuit voltage. Consequently $ \hat{y}_{k} = {v}_{k} $ is the predicted circuit voltage also known as measurable output: 
+Predicted variables $ \hat{y}_{k}$ and $ \hat{x}_{k} $  are commonly denoted by a "hat" to distinguish them from  $ {y}_{k} $ and $ {x}(k) $  of the physical system. As the state of charge (SoC) denoted as $\hat{x}_{k} = SoC_{k}$  cannot be measured directly it is always a predicted variable, opposed to ${y}(k)$, which is the measured circuit voltage. Consequently $ \hat{y}_{k} = {v}_{k} $ is the predicted circuit voltage also known as measurable output: 
 
 $ {\hat{y}}_{k}=\left(C-DK\right){\hat{x}}_{k} $ 
 
 Input to the extend kalman filter (EKF) is current and voltage measurement and the period of time between these measurements. The initialization of the EKF outputs the initial estimate state of charge  ${x}_{k|k=0} $ another input to the EKF. 
 
 {System's dynamic model} \\
-The $f() $ function is defined as the $ f({\boldsymbol {x}}_{k},{\boldsymbol {i}}_{k},t) = {x}_{k} - \frac{1}{{Q_{C}}}\int_{0}^{t} {i_{k}\ dk} $, thus current measurement $ {i}_{k} $ 
+The $f() $ function is defined as the $ f({\boldsymbol {x}}_{k},{\boldsymbol {i}}_{k},\Delta{t}) = {x}_{k} - \frac{1}{{Q_{C}}}\int_{0}^{\Delta t} {i_{k}\ dk} $ or more discrete $f({x}_{k},{i}_{k},\Delta{t}) = {x}_{k} - \frac{\Delta t}{Q_{C}} i_{k} $, thus current measurement $ {i}_{k} $ 
 The $h({\boldsymbol {x}}_{{k}})$ function is defined as the OCV lookup table. A general OCV lookup table for the battery chemistry can be used or for better results a specific OCV lookup established by offline measurements for  the given battery should be used. 
-To further improve the OCV prediction a correction of it can be performed by a equivalent circuit model (ECM) of the battery feeded by the current measurement used to predict the SOC: 
+To further improve the OCV prediction a correction of it can be performed by a equivalent circuit model (ECM) of the battery feeded by the current measurement used to predict the SoC: 
 $ {v}_{k} = {D} \ {OCV}({z}_{k}) + C {x}_{k}  +  D {i}_{k}  $ 
 with $ C = [0, -R_1, -R_2, ..., M] $ and $ D = R_0 $
 
 -Measurement equation, input (measured voltage, OCV lookup table, current if the correction with a Enhanced Self-Correcting (ESC) Cell Model /ECM) -> output SOC)
 equation should be use standard letters: filterpy, wikipedia, gregoryPlett, Step by Step Guide
 
-After having defined the observation and control-input model as matrices and described their meaning in case of SOC estimation we proceed to the functioning of the EKF, which is typically divided into to steps, Predict and Update. 
+After having defined the observation and control-input model as matrices and described their meaning in case of SoC estimation we proceed to the functioning of the EKF, which is typically divided into to steps, Predict and Update. 
 
 In the \textbf{predict} step a future state of charge estimate  $\hat x_{k+1}$ is predicted based on the current state of charge estimate $\hat x_k$ and the current $i_k$ during the period $\Delta t$ (between $k$ and $k+1$) by calculating $ \mathbf{\hat x_{k+1}=Ax_{k}+Bu_{k}} $ Moreover an estimate of the covariance $P_{k+1}x$ is calculated based on noise covariances $Q_k$ and current $P_k$ (wiki: a measure of the estimated uncertainty of the prediction of the system's state)  $\mathbf {P} _{k+1}=\mathbf {B} _{k}\mathbf {P} _{k}\mathbf {B} _{k}^{\textsf {T}}+\mathbf {Q} _{k} $
 
 In the \textbf{update} step  \\
-$ \mathbf {K} _{k}=\mathbf {P} _{k+1}\mathbf {H} _{k}^ \textsf {T} (  \mathbf \mathbf {H} _{k}\mathbf {P} _{k+1}\mathbf {H} _{k}^{\textsf {T}+\mathbf {R} _{k})^{-1}}$  is the kalman gain, which weights whether the SOC based on the measurement of the circuit voltage $v_k$ is more trusted than the SOC prediction based on current $i_k$ \\
+$ \mathbf {K} _{k}=\mathbf {P} _{k+1}\mathbf {H} _{k}^ \textsf {T} (  \mathbf \mathbf {H} _{k}\mathbf {P} _{k+1}\mathbf {H} _{k}^{\textsf {T}+\mathbf {R} _{k})^{-1}}$  is the kalman gain, which weights whether the SoC based on the measurement of the circuit voltage $v_k$ is more trusted than the SoC prediction based on current $i_k$ \\
 $ {\hat {\mathbf {x} }}_{k}=(\mathbf {I} -\mathbf {K} _{k}\mathbf {H} _{k})({\hat {\mathbf {x} }}_{k+1})+(\mathbf {K} _{k})(\mathbf {H} _{k}\mathbf {\hat x} _{k}+\mathbf {v} _{k}) $ TODO update $\hat x_k$ because one can not now want one want to calculate\\  
 
 $ \mathbf {P} _{k+1}=\left(\mathbf {I} -\mathbf {K} _{k+1}\mathbf {H} _{k+1}\right)\mathbf {P} _{k} $ update of the covariance TODO is $H_{k}$ the same as OCV? \\
 
-$\mathbf{R_k}$ the covariance of the observation noise 
+$\mathbf{R_k}$ the covariance of the observation noise  \\
 
-Most general equation of extended kalman filter EKF (state transition and observation models): 
+Most general equation of extended kalman filter EKF: \\
 
-$ \mathbf {x}_{k}=f(\mathbf {x} _{k-1},\mathbf {u}_{k})+\mathbf {w}_{k}\\\mathbf {z}_{k}=h(\mathbf {x} _{k})+\mathbf {v}_{k}$
-f() ->  predicted state from the previous estimate
-h() ->  compute the predicted measurement from the predicted state
-\section{Kalman-SOC}
+$ \mathbf {x}_{k}=f(\mathbf {x} _{k-1},\mathbf {u}_{k})+\mathbf {w}_{k}\ $ (state transition model) \\
+$\mathbf {z}_{k}=h(\mathbf {x} _{k})+\mathbf {v}_{k}$ \ \ \ \ \ \ \ \ \ \ \  \ (observation model)  \\
+\emph{f} ->  predicted state from the previous estimate  \\
+\emph{h} ->  compute the predicted measurement from the predicted state \\
+
+
+\textbf{Predict} \\
+${\displaystyle {\hat {\boldsymbol {x}}}_{k|k-1}=f({\hat {\boldsymbol {x}}}_{k-1|k-1},{\boldsymbol {u}}_{k})} $ \\
+${\displaystyle {\boldsymbol {P}}_{k|k-1}={{\boldsymbol {F}}_{k}}{\boldsymbol {P}}_{k-1|k-1}{{\boldsymbol {F}}_{k}^{\top }}+{\boldsymbol {Q}}_{k}}$ \\
+
+\textbf{Update} \\
+${\tilde  {{\boldsymbol  {y}}}}_{{k}}={\boldsymbol  {z}}_{{k}}-h({\hat  {{\boldsymbol  {x}}}}_{{k|k-1}})$ \\
+${\boldsymbol  {S}}_{{k}}={{{\boldsymbol  {H}}_{{k}}}}{\boldsymbol  {P}}_{{k|k-1}}{{{\boldsymbol  {H}}_{{k}}^{\top }}}+{\boldsymbol  {R}}_{{k}}$ \\
+${\boldsymbol  {K}}_{{k}}={\boldsymbol  {P}}_{{k|k-1}}{{{\boldsymbol  {H}}_{{k}}^{\top }}}{\boldsymbol  {S}}_{{k}}^{{-1}}$ \\
+${\hat  {{\boldsymbol  {x}}}}_{{k|k}}={\hat  {{\boldsymbol  {x}}}}_{{k|k-1}}+{\boldsymbol  {K}}_{{k}}{\tilde  {{\boldsymbol  {y}}}}_{{k}}$ \\
+${\boldsymbol  {P}}_{{k|k}}=({\boldsymbol  {I}}-{\boldsymbol  {K}}_{{k}}{{{\boldsymbol  {H}}_{{k}}}}){\boldsymbol  {P}}_{{k|k-1}}$ \\
+
+
+
+
+\section{Kalman-SoC}
 A Fork of Okra-Solar Algorithm. \
 
 Features: \
@@ -136,19 +223,21 @@ Features: \
 
 -Inputs: Current and Voltage Measurements and OCV Lookup Table
 
--Outputs: SOC in \%Wh
+-Outputs: SoC in \%Wh
 
 TODO Discuss the Code Snippets? But Some Code in Appendix or reference Github Repo only? 
 \chapter{Validation}
 
-Integrated matplotlib inline with pythontex
+
+\ref{K1_Python in Latex} has all the info how to integrate graphs here. 
  
 Discuss results.  (4d)
 
 \chapter{Outlook}
-Quote: \textbf{online parameter estimation} from the ARX model 
 
-State of Charge and State of Health Estimation of
-AGM VRLA Batteries by Employing a Dual Extended
-Kalman Filter and an ARX Model for Online
-Parameter Estimation
+Promising articles and/or methods for online parameter estimation: \\ 
+
+\textbf{online parameter estimation} from the ARX model  \cite{tran2017state}
+
+\cite{xia2018online}
+\cite{wang2021augmented}
