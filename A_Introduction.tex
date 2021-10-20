@@ -7,13 +7,23 @@
 
 \chapter{Introduction}
 
-(4d) (mostly offline)
+%Solve babel issue with beuth package: https://texwelt.de/fragen/4775/neuinstallation-texlive-probleme-mit-babel -> sudo apt install texlive-lang-german
 
-sudo apt install texlive-lang-german
+TODO convert document to english. for examples Kapitel 1 needs to be Chapter one, so does Inhaltverzeichnis and so 
+(4d) (mostly offline)
 
 \section{Python Code within Latex} 
 \label{K1_Python in Latex}
-%pdflatex -synctex=1 -interaction=nonstopmode %.tex pythontex --interpreter python:python3 main.tex pdflatex -synctex=1 -interaction=nonstopmode %.tex
+%Resource: https://github.com/gpoore/pythontex 
+%Run pythontex systems with python3  an no python command: https://github.com/gpoore/pythontex/issues/177
+%Configure 	Texstudio to run: 	https://www.alanshawn.com/tech/2019/05/18/scientific-python-5.html (only seems to work for debian package and not for flatpak as it throws the following error: Traceback (most recent call last): File "/app/texlive/bin/x86_64-linux/pythontex", line 55, in <module> import pythontex3 as pythontex ModuleNotFoundError: No module named 'pythontex3' Process exited with error(s) ) The issue is explained here: https://discourse.flathub.org/t/two-questions-about-using-the-texlive-sdk-extension/566 but it is unclear whether Texstudio flatpak packages even uses runtime/org.freedesktop.Sdk.Extension.texlive 	
+%https://pypi.org/project/pythontexfigures/ (not necessary, but mabye more confortable for plotting graphs?)
+%Plotting with matplotlib: http://conference.scipy.org/proceedings/scipy2012/pdfs/geoffrey_poore.pdf
+%Package to install: https://github.com/matplotlib/matplotlib/issues/16911  -> sudo	 apt install cm-super.
+%Plot with plotly: https://plotly.com/python/static-image-export/	
+%pdflatex -synctex=1 -interaction=nonstopmode %.tex 
+%pythontex --interpreter python:python3 (as command )
+%even better when you run pythontex --interpreter python:python3 main.tex on console
 %http://tug.ctan.org/macros/latex/contrib/pythontex/pythontex_gallery.pdf
 
 \begin{pycode}
@@ -23,9 +33,9 @@ print("Python says ``Hello we got it running finally!! YEahjjjjjjo ''")
 \end{pycode}
 
 \begin{pyconsole}
-x = 250
+x = 400
 x = x*2
-y = 5
+y = 10
 \end{pyconsole}
 
 
@@ -40,7 +50,7 @@ The Result of y*2 is $y=\pycon{y}$
 \begin{pylabcode}[plotsession]
 rc('text', usetex=True)
 rc('font', **{'family':'serif', 'serif':['Times']})
-rc('font', size=10.0)
+rc('font', size=10.0)			
 rc('legend', fontsize=10.0)
 x = linspace(0, 3*pi)
 figure(figsize=(3.25,2))
@@ -56,7 +66,7 @@ legend(loc='lower right')
 savefig('myplot.pdf', bbox_inches='tight')
 \end{pylabcode}
 
-\begin{figure}
+\begin{figure}[h]
 \centering
 \includegraphics{myplot}
 \caption{\label{fig:matplotlib} A plot
@@ -70,17 +80,19 @@ df = px.data.gapminder().query("continent=='Oceania'")
 fig = px.line(df, x="year", y="lifeExp", color='country')
 fig.write_image("plotly.pdf")
 \end{pylabcode}
-
-\begin{figure}
+	
+\begin{figure}[h!]
 \centering
 \includegraphics{plotly}
 \caption{\label{fig:matplotlib} A plot
 created with PythonTeX and Plotly}
 \end{figure}
 
-\section{why Kalman, why EKF????}
+\section{why Kalman, why EKF?}
 
 Other methods are based on auto regressive exogenous (ARX) model or a combination of it and the Kalman Filter.
+
+
 
 
 \chapter{Implementation}
