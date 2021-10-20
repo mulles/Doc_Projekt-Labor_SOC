@@ -7,13 +7,11 @@
 
 \chapter{Introduction}
 
-%Solve babel issue with beuth package: https://texwelt.de/fragen/4775/neuinstallation-texlive-probleme-mit-babel -> sudo apt install texlive-lang-german
 
-TODO convert document to english. for examples Kapitel 1 needs to be Chapter one, so does Inhaltverzeichnis and so 
 (4d) (mostly offline)
 
-\section{Python Code within Latex} 
-\label{K1_Python in Latex}
+\section{How to get pythontex and the BHT Latex Template compiling to PDF }
+%Solve babel issue with beuth package: https://texwelt.de/fragen/4775/neuinstallation-texlive-probleme-mit-babel -> sudo apt install texlive-lang-german
 %Resource: https://github.com/gpoore/pythontex 
 %Run pythontex systems with python3  an no python command: https://github.com/gpoore/pythontex/issues/177
 %Configure 	Texstudio to run: 	https://www.alanshawn.com/tech/2019/05/18/scientific-python-5.html (only seems to work for debian package and not for flatpak as it throws the following error: Traceback (most recent call last): File "/app/texlive/bin/x86_64-linux/pythontex", line 55, in <module> import pythontex3 as pythontex ModuleNotFoundError: No module named 'pythontex3' Process exited with error(s) ) The issue is explained here: https://discourse.flathub.org/t/two-questions-about-using-the-texlive-sdk-extension/566 but it is unclear whether Texstudio flatpak packages even uses runtime/org.freedesktop.Sdk.Extension.texlive 	
@@ -26,26 +24,36 @@ TODO convert document to english. for examples Kapitel 1 needs to be Chapter one
 %even better when you run pythontex --interpreter python:python3 main.tex on console
 %http://tug.ctan.org/macros/latex/contrib/pythontex/pythontex_gallery.pdf
 
+
+TODO convert document to english. for examples Kapitel 1 needs to be Chapter one, so does Inhaltverzeichnis and so 
+
+
+\section{Python Code within Latex} 
+\label{K1_Python in Latex}
+
+
+
+
+\subsection{Integrated matplotlib inline with pythontex}
+
+%If you want to run the code, but don't want to show it, use the \verb+pycode+ environment.
+
+% A simple print example, will move to cheatsheat
 \begin{pycode}
+
 
 print("Python says ``Hello we got it running finally!! YEahjjjjjjo ''")
 
 \end{pycode}
-
+% A simple calculation example, will move to cheatsheat
 \begin{pyconsole}
 x = 400
 x = x*2
 y = 10
 \end{pyconsole}
-
-
-The variable is $x=\pycon{x}$
+The variable is $x=\pycon{x}$. 
 The Result of y*2 is $y=\pycon{y}$
 
-
-\subsection{Integrated matplotlib inline with pythontex}
-%If you want to run the code, but don't want to show it, use the \verb+pycode+ environment.
- 
 
 \begin{pylabcode}[plotsession]
 rc('text', usetex=True)
@@ -66,11 +74,9 @@ legend(loc='lower right')
 savefig('myplot.pdf', bbox_inches='tight')
 \end{pylabcode}
 
-\begin{figure}[h]
-\centering
+\begin{figure}[h!]
 \includegraphics{myplot}
-\caption{\label{fig:matplotlib} A plot
-created with PythonTeX and Matplotlib}
+\caption{\label{fig:matplotlib} A plot created with PythonTeX and Matplotlib}
 \end{figure}
 
 \begin{pylabcode}
@@ -82,65 +88,55 @@ fig.write_image("plotly.pdf")
 \end{pylabcode}
 	
 \begin{figure}[h!]
-\centering
 \includegraphics{plotly}
-\caption{\label{fig:matplotlib} A plot
-created with PythonTeX and Plotly}
+\caption{\label{fig:plotly} A plot created with PythonTeX and Plotly}
 \end{figure}
 
 \section{why Kalman, why EKF?}
 
-Other methods are based on auto regressive exogenous (ARX) model or a combination of it and the Kalman Filter.
+The kalman filter is a great tool to base a SoC algorithms on, as it is clearly defined by mathematical theories more than by a arbitrary algorithm designed by a programmer. One needs to use a extend kalman filter as the problem to solve is non linear, TODO explain why it is non linear. 
 
-
-
+Other methods are based on auto regressive exogenous (ARX) model or a combination of it and the Kalman Filter. TODO reference to resources.
 
 \chapter{Implementation}
 
-
-
 \section{Hardware Setup for validation}
+
+TODO Migrate from the other document.
 
 \section{EKF Implementation}
 date: (4d)
 
 To design an extended kalman filter algorithm three steps are necessary:
 1.The control-input model and the observation model need to be well designed. 
-2.The constants inside the models expressed as matrixes need to be definied, which is as well known as parametrisation of the model.  
+2.The constants inside the models expressed as matrices need to be defined, which is as well known as parametrization of the model.  
 3.The model needs to be implemented as code running on embedded systems. 
 
-The key to success for a good SoC is a good definition of both models and a good parametrisation. The implementation is independent of the use case and depends on the skills of the programmer, in his  hands lies the optimization of the  code. In case no FPU is available on the micro-controller unit (MCU) fix point arithmetic might be an option.  
+The key to success for a good SoC is a good definition of both models and a good parametrization. The implementation is independent of the use case and depends on the skills of the programmer, in his  hands lies the optimization of the  code. In case no FPU is available on the micro-controller unit (MCU) fix point arithmetic might be an option.  
 
-Particulary challenging is the parametrization, which is typically done offline \footnote{not done on the microcomtroller unit (MCU) the algorithm is deployed to, thus not on the system running the final algorithm. Offline means on more advanced hardware, which is not available in the final product. See \url{https://en.wikipedia.org/wiki/Online_model} } and required quite advanced equipment. Adaptive extend Kalman Filter is an option where the parameters are determined online, but still AEKF needs to be initialized with parameters not necessary fitting all batteries of a given chemistry (different capacities, different manufacturer). TODO It needs to be researched if it only affects the convergence time or if convergence is not reached at all?  A further advantage of an adaptive filter is that the state of health (SOH) can be determined along the side. 
-When simple observation and control-input models are used as in the okra kalman-soc algo, the parametrisation might be much easier? TODO to check if the only parameters OCV(SoC) data can be used generally or only on the batteries they have been measured on. 
+Particularly challenging is the parametrization, which is typically done offline \footnote{not generated by the micro controller unit (MCU) the algorithm is deployed to, thus not on the system running the final algorithm. Offline means on more advanced hardware, which is not available in the final product. See \url{https://en.wikipedia.org/wiki/Online_model} } and requires quite advanced equipment. The Adaptive extend Kalman Filter (AEKF) is an option, where the parameters are determined online, but still AEKF needs to be initialized with parameters not necessary fitting all batteries of a given chemistry, because of different capacities or tolerances and specific designs. 
+TODO It needs to be researched if it only affects the convergence time or if convergence is not reached at all? A further advantage of an adaptive filter is that the state of health (SOH) can be determined along the side. 
+When simple observation and control-input models are used as in the okra kalman-soc algorithm, the parametrization might be much easier?
+TODO to check if the initial parameters, in this case OCV in function of SoC data can be used generally or only on the batteries, the data has been generated with. \\
 
+\textbf{Citations concerning the on/off-line parametrization} \\
 
-Offline parametrizatio: 
-
-Quote: "As a result, many experimental pretests investigating the
+Offline parametrization: \\
+'As a result, many experimental pretests investigating the
 effects of the internal and external conditions of a battery on its parameters are required, since the
 accuracy of state estimation depends on the quality of the information regarding battery parameter
-changes"
+changes'
 
+'Therefore, some tests data must be available in 
+advance to find the parameters of these models.'
+\cite{hussein2011overview}  \\ \\ \\ \\
 
-
-"Therefore, some tests data must be available in 
-advance to find the parameters of these models."
-\cite{hussein2011overview}  \\
-
- 
-
-
-
-
-
-Gregory Plett says: 
-"Two possible approaches: \\
-
+Gregory Plett says: \\
+'Two possible approaches: \\
 
 First, an algorithm might somehow adapt the parameter values of the model during operation to match presently observed current–voltage behaviors; but, this \textbf{must be done very carefully to avoid making the model unstable or physically nonmeaningful}. \\
 
-Alternately, a set of models could be pre-computed at different feasible aging points and the model from this set that most closely predicts presently observed current–voltage dynamics could be selected from the set. This second approach guarantees stable and physically meaningful models since all models in the pre-computed set meet these criteria. We propose such an approach here." 
+Alternately, a set of models could be pre-computed at different feasible aging points and the model from this set that most closely predicts presently observed current–voltage dynamics could be selected from the set. This second approach guarantees stable and physically meaningful models since all models in the pre-computed set meet these criteria. We propose such an approach here.' 
 ---https://www.sciencedirect.com/science/article/abs/pii/S2352152X18301385?via%3Dihub
 In order to have online first algo, the parametrization needs to be done online!. 
 

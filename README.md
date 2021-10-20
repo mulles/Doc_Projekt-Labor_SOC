@@ -8,8 +8,8 @@ This document describes the research, implementation and verification of an embe
 Linux:  
 `$ git clone https://github.com/mulles/Doc_Projekt-Labor_SOC`  
 `$ cd Doc_Projekt-Labor_SOC`  
-`$ make` or compile with TeXStudio a Latex IDE 
+`$ make` (obsolte with new ptythontex integration use TeXStudio a Latex IDE with special build commands COULDDO complete
 
-COULDDO Add CI to build on remote machine aka linux ubuntu server:
-`sudo apt install texlive-lang-german cm-super texlive-base texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra`
-`pdflatex main.tex | pythontex --interpreter python:python3 main.tex | pdflatex main.tex`
+SHOULDDO Add CI to build on remote machine aka linux ubuntu server:  
+`$ sudo apt install texlive-lang-german cm-super texlive-base texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra`  
+`$ dflatex main.tex | pythontex --interpreter python:python3 main.tex | pdflatex main.tex`  
