@@ -1,3 +1,0 @@
-[submodule "dep/kalman-soc"]
-	path = dep/kalman-soc
-	url = https://github.com/mulles/kalman-soc.git
