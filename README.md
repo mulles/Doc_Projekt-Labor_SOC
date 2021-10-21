@@ -6,14 +6,16 @@ This document describes the research, implementation and verification of an embe
 **Build/Compile the Latex document**
 
 Linux:  
-  #Install requirements
+  #Install requirements  
     `sudo apt install texlive-lang-german cm-super texlive-base texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra`  
    
   #Git clone this repository with `--recursive` option:  
      `git clone --recursive git@github.com:mulles/Doc_Projekt-Labor_SOC.git` 
      #or run `git submodule update --init --recursive` after normal clone.
-  #Build/Compile Latex to PDF  
+
+  #Build/Compile Latex to PDF    
     `$ cd Doc_Projekt-Labor_SOC`  
     `pdflatex main.tex | pythontex --interpreter python:python3 main.tex | pdflatex main.tex` 
+
 
 SHOULDDO Add CI to build on remote machine aka linux ubuntu server. 
