@@ -7,7 +7,7 @@ This document describes the research, implementation and verification of an embe
 
 Linux:  
   #Install requirements  
-    `sudo apt install texlive-lang-german cm-super texlive-base texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra`  
+    `sudo apt install texlive-lang-german cm-super texlive-base texlive-latex-extra texlive-extra-utils texlive-fonts-recommended texlive-fonts-extra`  
    
   #Git clone this repository with `--recursive` option:  
      `git clone --recursive git@github.com:mulles/Doc_Projekt-Labor_SOC.git` 
