@@ -16,6 +16,3 @@ Linux:
   #Build/Compile Latex to PDF    
     `$ cd Doc_Projekt-Labor_SOC`  
     `pdflatex main.tex | pythontex --interpreter python:python3 main.tex | pdflatex main.tex` 
-
-
-SHOULDDO Add CI to build on remote machine aka linux ubuntu server. 
