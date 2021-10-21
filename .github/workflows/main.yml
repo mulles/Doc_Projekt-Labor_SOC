@@ -27,7 +27,7 @@ jobs:
 
       # Runs a single command using the runners shell
       - name: Install all dependencies to build PDF
-        run: sudo apt install texlive-lang-german cm-super texlive-base texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra
+        run: sudo apt install texlive-lang-german cm-super texlive-base texlive-latex-extra texlive-extra-utils texlive-fonts-recommended texlive-fonts-extra
         
       # Runs a single command using the runners shell
       - name: Compile PDF
