@@ -1,16 +1,9 @@
 %%
-%% Beuth Hochschule für Technik --  Projektarbeit/Projekt-Labor
+%% Berliner Hochschule für Technik --  Projektarbeit/Projekt-Labor
 %%
 %% Kapitel 1
 %%
 %%
-
-\chapter{Introduction}
-
-
-(4d) (mostly offline)
-
-\section{How to get pythontex and the BHT Latex Template compiling to PDF }
 %Solve babel issue with beuth package: https://texwelt.de/fragen/4775/neuinstallation-texlive-probleme-mit-babel -> sudo apt install texlive-lang-german
 %Resource: https://github.com/gpoore/pythontex 
 %Run pythontex systems with python3  an no python command: https://github.com/gpoore/pythontex/issues/177
@@ -25,72 +18,18 @@
 %http://tug.ctan.org/macros/latex/contrib/pythontex/pythontex_gallery.pdf
 
 
+\chapter{Introduction}
+
 TODO convert document to english. for examples Kapitel 1 needs to be Chapter one, so does Inhaltverzeichnis and so 
 
-
-\section{Python Code within Latex} 
-\label{K1_Python in Latex}
+(4d) (mostly offline)
 
 
-\subsection{Integrated matplotlib inline with pythontex}
 
-%If you want to run the code, but don't want to show it, use the \verb+pycode+ environment.
-
-% A simple print example, will move to cheatsheat
-\begin{pycode}
-
-
-print("Python says ``Hello we got it running finally!! YEahjjjjjjo ''")
-
-\end{pycode}
-% A simple calculation example, will move to cheatsheat
-\begin{pyconsole}
-x = 400
-x = x*2
-y = 10
-\end{pyconsole}
-The variable is $x=\pycon{x}$. 
-The Result of y*2 is $y=\pycon{y}$
-
-
-\begin{pylabcode}[plotsession]
-rc('text', usetex=True)
-rc('font', **{'family':'serif', 'serif':['Times']})
-rc('font', size=10.0)			
-rc('legend', fontsize=10.0)
-x = linspace(0, 3*pi)
-figure(figsize=(3.25,2))
-plot(x, sin(x), label='$\sin(x)$')
-plot(x, sin(x)**2, label='$\sin^2(x)$',
-linestyle='dashed')
-xlabel(r'$x$-axis')
-ylabel(r'$y$-axis')
-xticks(arange(0, 4*pi, pi), ('$0$',
-'$\pi$', '$2\pi$', '$3\pi$'))
-axis([0, 3*pi, -1, 1])
-legend(loc='lower right')
-savefig('myplot.pdf', bbox_inches='tight')
-\end{pylabcode}
-
-\begin{figure}[h!]
-\includegraphics{myplot}
-\caption{\label{fig:matplotlib} A plot created with PythonTeX and Matplotlib}
-\end{figure}
-
-\begin{pylabcode}
-import plotly.express as px
-
-df = px.data.gapminder().query("continent=='Oceania'")
-fig = px.line(df, x="year", y="lifeExp", color='country')
-fig.write_image("plotly.pdf")
-\end{pylabcode}
-	
-\begin{figure}[h!]
-\includegraphics{plotly}
-\caption{\label{fig:plotly} A plot created with PythonTeX and Plotly}
-\end{figure}
 
 \section{why Kalman, why EKF?}
+
+\cite{espedal2021current}
 
 The kalman filter is a great tool to base a SoC algorithms on, as it is clearly defined by mathematical theories more than by a arbitrary algorithm designed by a programmer. One needs to use a extend kalman filter as the problem to solve is non linear, TODO explain why it is non linear. 
 
@@ -100,12 +39,21 @@ Other methods are based on auto regressive exogenous (ARX) model or a combinatio
 
 \section{Hardware Setup for validation}
 
+\begin{figure}[h!]
+\includegraphics{SOC_Setup.png}
+\caption{\label{fig:SoCSetup} Setup to verify SoC Algorithm}
+\end{figure}
+
+
+
 TODO Migrate from the other document.
 
 TODO What resolution is necessary. 
 
 \section{EKF Implementation}
 date: (4d)
+
+A good step by step guide to implement the extended kalman filter is \cite{rzepka2021implementing}.
 
 To design an extended kalman filter algorithm three steps are necessary:
 1.The control-input model and the observation model need to be well designed. 
@@ -222,7 +170,7 @@ ${\boldsymbol  {P}}_{{k|k}}=({\boldsymbol  {I}}-{\boldsymbol  {K}}_{{k}}{{{\bold
 
 
 
-\section{Kalman-SoC}
+\subsection{Kalman-SoC}
 A Fork of Okra-Solar Algorithm. \
 
 Features: \
@@ -237,8 +185,63 @@ TODO Discuss the Code Snippets? But Some Code in Appendix or reference Github Re
 \chapter{Validation}
 
 
-\ref{K1_Python in Latex} has all the info how to integrate graphs here. 
- 
+\section{Graphs with Matplotlib or plotly}
+
+%If you want to run the code, but don't want to show it, use the \verb+pycode+ environment.
+
+% A simple print example, will move to cheatsheat
+\begin{pycode}
+
+
+print("Python says ``Hello we got it running finally!! YEahjjjjjjo ''")
+
+\end{pycode}
+% A simple calculation example, will move to cheatsheat
+\begin{pyconsole}
+x = 400
+x = x*2
+y = 10
+\end{pyconsole}
+The variable is $x=\pycon{x}$. 
+The Result of y*2 is $y=\pycon{y}$
+
+
+\begin{pylabcode}[plotsession]
+rc('text', usetex=True)
+rc('font', **{'family':'serif', 'serif':['Times']})
+rc('font', size=10.0)			
+rc('legend', fontsize=10.0)
+x = linspace(0, 3*pi)
+figure(figsize=(3.25,2))
+plot(x, sin(x), label='$\sin(x)$')
+plot(x, sin(x)**2, label='$\sin^2(x)$',
+linestyle='dashed')
+xlabel(r'$x$-axis')
+ylabel(r'$y$-axis')
+xticks(arange(0, 4*pi, pi), ('$0$',
+'$\pi$', '$2\pi$', '$3\pi$'))
+axis([0, 3*pi, -1, 1])
+legend(loc='lower right')
+savefig('myplot.pdf', bbox_inches='tight')
+\end{pylabcode}
+
+\begin{figure}[h!]
+\includegraphics{myplot}
+\caption{\label{fig:matplotlib} A plot created with PythonTeX and Matplotlib}
+\end{figure}
+
+\begin{pylabcode}
+import plotly.express as px
+
+df = px.data.gapminder().query("continent=='Oceania'")
+fig = px.line(df, x="year", y="lifeExp", color='country')
+fig.write_image("plotly.pdf")
+\end{pylabcode}
+	
+\begin{figure}[h!]
+\includegraphics{plotly}
+\caption{\label{fig:plotly} A plot created with PythonTeX and Plotly}
+\end{figure}
 Discuss results.  (4d)
 
 \chapter{Outlook}
