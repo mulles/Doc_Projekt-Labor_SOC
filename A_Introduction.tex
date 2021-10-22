@@ -22,6 +22,9 @@
 
 TODO convert document to english. for examples Kapitel 1 needs to be Chapter one, so does Inhaltverzeichnis and so 
 
+This document is available on github in is source format \cite{Schons_Development_and_validation_2021}
+TODO github link as footnote?
+
 (4d) (mostly offline)
 
 
@@ -39,7 +42,7 @@ Other methods are based on auto regressive exogenous (ARX) model or a combinatio
 
 \section{Hardware Setup for validation}
 
-\begin{figure}[h!]
+\begin{figure}[!ht]
 \includegraphics{SOC_Setup.png}
 \caption{\label{fig:SoCSetup} Setup to verify SoC Algorithm}
 \end{figure}
@@ -184,26 +187,9 @@ Features: \
 TODO Discuss the Code Snippets? But Some Code in Appendix or reference Github Repo only? 
 \chapter{Validation}
 
+Discuss results.  (4d)
 
 \section{Graphs with Matplotlib or plotly}
-
-%If you want to run the code, but don't want to show it, use the \verb+pycode+ environment.
-
-% A simple print example, will move to cheatsheat
-\begin{pycode}
-
-
-print("Python says ``Hello we got it running finally!! YEahjjjjjjo ''")
-
-\end{pycode}
-% A simple calculation example, will move to cheatsheat
-\begin{pyconsole}
-x = 400
-x = x*2
-y = 10
-\end{pyconsole}
-The variable is $x=\pycon{x}$. 
-The Result of y*2 is $y=\pycon{y}$
 
 
 \begin{pylabcode}[plotsession]
@@ -225,30 +211,46 @@ legend(loc='lower right')
 savefig('myplot.pdf', bbox_inches='tight')
 \end{pylabcode}
 
-\begin{figure}[h!]
+\begin{figure}[!ht]
 \includegraphics{myplot}
 \caption{\label{fig:matplotlib} A plot created with PythonTeX and Matplotlib}
 \end{figure}
 
 \begin{pylabcode}
-import plotly.express as px
+import os 
+import pandas as pd
+currentWorkingDir =  os.getcwd()
+outputDataDir = currentWorkingDir + '/dep/kalman-soc/data/'
+dfProcessedSensorDataEnhanced = pd.read_csv(outputDataDir + 'EVLKpN_20210817-20210830_enhanced_processed_sensor_data.zip')  
 
-df = px.data.gapminder().query("continent=='Oceania'")
-fig = px.line(df, x="year", y="lifeExp", color='country')
-fig.write_image("plotly.pdf")
+#Matplotlib
+dfProcessedSensorDataEnhanced.plot()
+plt.show()
+savefig('matplotoverview.pdf', bbox_inches='tight')
+
+#Plotly
+pd.options.plotting.backend = "plotly"
+fig = dfProcessedSensorDataEnhanced.plot()
+fig.update_layout(title_text='<b> Overview  </b>', title_x=0.5)
+fig.show()
+fig.write_image("overview.pdf")
 \end{pylabcode}
 	
-\begin{figure}[h!]
-\includegraphics{plotly}
-\caption{\label{fig:plotly} A plot created with PythonTeX and Plotly}
+\begin{figure}[!ht]
+\includegraphics{overview}
+\caption{\label{fig:overview} Overview of data}
 \end{figure}
-Discuss results.  (4d)
+
+\begin{figure}[!ht]
+\includegraphics{matplotoverview}
+\caption{\label{fig:overview} Overview of data}
+\end{figure}
 
 \chapter{Outlook}
 
 Promising articles and/or methods for online parameter estimation: \\ 
 
-\textbf{online parameter estimation} from the ARX model  \cite{tran2017state}
+\textbf{online parameter estimation} from the ARX model {tran2017state}
 
-\cite{xia2018online}
 \cite{wang2021augmented}
+{xia2018online}

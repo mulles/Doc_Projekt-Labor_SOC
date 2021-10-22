@@ -20,11 +20,13 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{pythontex}
+\usepackage{titlesec}
+\titleformat{\chapter}{}{}{0em}{\bf\LARGE}
 
 
 
 \usepackage{hyperref}
-\usepackage{filecontents}
+%\usepackage{filecontents} as is it obsolete
 
 \lstset{ 
   literate={ö}{{\"o}}1
@@ -82,13 +84,14 @@
 
 %%\renewcommand{\baselinestretch}{1.05} 
 \begin{document}
+
 \pagestyle{fancy}
 
 \input{titelseiten.tex}
 
 \pagenumbering{arabic}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Die Kapitel der Arbeitw
+%% Chapters of the work
 
 \input{A_Introduction.tex}
 %\input{kapitel2/ch2.tex}
