@@ -20,10 +20,10 @@
 
 \chapter{Introduction}
 
-TODO convert document to english. for examples Kapitel 1 needs to be Chapter one, so does Inhaltverzeichnis and so 
 
-This document is available on github in is source format \cite{Schons_Development_and_validation_2021}
-TODO github link as footnote?
+
+The git source code repository of this document  \cite{Schons_Development_and_validation_2021} is available at \footnote{ \url{https://github.com/mulles/Doc_Projekt-Labor_SOC} }
+
 
 (4d) (mostly offline)
 
@@ -32,13 +32,28 @@ TODO github link as footnote?
 
 \section{why Kalman, why EKF?}
 
-\cite{espedal2021current}
+\cite{espedal2021current}  Current Trends for State-of-Charge (SoC) Estimation in
+Lithium-Ion Battery Electric Vehicles.
 
 The kalman filter is a great tool to base a SoC algorithms on, as it is clearly defined by mathematical theories more than by a arbitrary algorithm designed by a programmer. One needs to use a extend kalman filter as the problem to solve is non linear, TODO explain why it is non linear. 
 
 Other methods are based on auto regressive exogenous (ARX) model or a combination of it and the Kalman Filter. TODO reference to resources.
 
 \chapter{Implementation}
+
+
+
+Link to source code. \footnote{ \url{https://github.com/mulles/kalman-soc} } The algo is a fork of a kalman-soc from  Matthew Johnston of the company okra-solar. 
+Some adjustments have been made to improve or adapt it to libre.solar use case and code base. 
+
+Changelog: 
+
+-adoption of libre solar code style guide 
+-change of energy counting to coulomb counting
+-use of float instead of integer in order to guarantee correct calculations, with no overflow. 
+-
+-exact changes are traceable with the commits to the fork. 
+
 
 \section{Hardware Setup for validation}
 
@@ -186,6 +201,20 @@ Features: \
 
 TODO Discuss the Code Snippets? But Some Code in Appendix or reference Github Repo only? 
 \chapter{Validation}
+
+2 Arten von Datensätze: 
+
+Vergleich alter Algo neuer Algo, mit Daten von einem Device. X mit Zeit? Vllt schafft man dies im gleiche Schritt wie man die Zeiträume verbessert? Y Achse in 100%. Legende mit Kalman-Soc & libre.solar
+Titel SoC Libre.solar Algo vs Kalman-soc auf Datensatz von Device xy im Zeitraum xx. Kein Titel in der Graphik selber. 
+Mit Matplotlib da ist wsl mehr Hilfe verfügbar? Schnell mal mit Plotly versuchen. 
+
+-Prozent Abweichung dazwischen. Warum ist er besser? Scheint schwer zu diskutieren.
+
+-Meine Daten? 
+
+-Neue Daten generieren? Der Prozess ist ja eigentlich recht automatisiert. 
+
+It is difficult to say that how much the kalman-soc algo is better, but sure is that both are different and that there are many cases where it is sure that libre.solar performs poorly, show examples timeframes.
 
 Discuss results.  (4d)
 

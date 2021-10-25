@@ -14,3 +14,4 @@ fig = dfProcessedSensorDataEnhanced.plot()
 fig.update_layout(title_text='<b> Overview  </b>', title_x=0.5)
 fig.show()
 fig.write_image("overview.pdf")
+-m 
