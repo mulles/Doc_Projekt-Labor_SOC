@@ -1,10 +1,23 @@
 %%
-%% Beuth Hochschule für Technik --  Abschlussarbeit
+%% Berliner Hochschule für Technik --  Abschlussarbeit
 %%
-%% Hauptdokument
+%% Main document
 %%
 %% 23.01.09 Tschirley V.01
 %%
+%Solve babel issue with beuth package: https://texwelt.de/fragen/4775/neuinstallation-texlive-probleme-mit-babel -> sudo apt install texlive-lang-german
+%Resource: https://github.com/gpoore/pythontex 
+%Run pythontex systems with python3  an no python command: https://github.com/gpoore/pythontex/issues/177
+%Configure 	Texstudio to run: 	https://www.alanshawn.com/tech/2019/05/18/scientific-python-5.html (only seems to work for debian package and not for flatpak as it throws the following error: Traceback (most recent call last): File "/app/texlive/bin/x86_64-linux/pythontex", line 55, in <module> import pythontex3 as pythontex ModuleNotFoundError: No module named 'pythontex3' Process exited with error(s) ) The issue is explained here: https://discourse.flathub.org/t/two-questions-about-using-the-texlive-sdk-extension/566 but it is unclear whether Texstudio flatpak packages even uses runtime/org.freedesktop.Sdk.Extension.texlive 	
+%https://pypi.org/project/pythontexfigures/ (not necessary, but mabye more confortable for plotting graphs?)
+%Plotting with matplotlib: http://conference.scipy.org/proceedings/scipy2012/pdfs/geoffrey_poore.pdf
+%Package to install: https://github.com/matplotlib/matplotlib/issues/16911  -> sudo	 apt install cm-super.
+%Plot with plotly: https://plotly.com/python/static-image-export/	
+%pdflatex -synctex=1 -interaction=nonstopmode %.tex 
+%pythontex --interpreter python:python3 (as command )
+%even better when you run pythontex --interpreter python:python3 main.tex on console
+%http://tug.ctan.org/macros/latex/contrib/pythontex/pythontex_gallery.pdf
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \documentclass[11pt, a4paper]{book}
 
