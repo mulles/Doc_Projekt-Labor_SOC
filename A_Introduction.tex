@@ -5,22 +5,32 @@
 %%
 %%
 
+%TODO After release of this document: 
+%1) adjust to code style
+%2) make a release with changelog
+
 
 \chapter{Introduction}
 \label{chap:Introduction}
 
-The scope of the project is to produce an algorithm for the solar charge controller (mppt-1210-hus) \footnote{\url{https://github.com/LibreSolar/mppt-1210-hus}} produced by libre.solar, which outputs the state of charge (SoC) of the lead acid battery attached to it. A key principle followed throughout the project is to use, wherever possible, Free Open-source Hardware (FOSH) and Free Open-source Software (FOSS). Consequently, the whole project has beenreleased as source code with a license adhering to these principles \cite{Schons_Development_and_validation_2021} is available at \footnote{ \url{https://github.com/mulles/Doc_Projekt-Labor_SOC} }. As the SoC can only be measured indirectly, it has to be deduced from available measurements.  %TODO at citations here that prove this
-The charge controller exposes battery current and voltage measurements once a second for this purpose. \\
+The scope of the project is to produce an algorithm for the solar charge controller (mppt-1210-hus) \footnote{\url{https://github.com/LibreSolar/mppt-1210-hus}} produced by libre.solar, which outputs the state of charge (SoC) of the lead acid battery attached to it.
+
+%TODO put a schematic of photo of the setup here, could be the design of the controller as well.
+
+A key principle followed throughout the project is to use, wherever possible, Free Open-source Hardware (FOSH) and Free Open-source Software (FOSS). Consequently, the whole project has beenreleased as source code with a license adhering to these principles \cite{Schons_Development_and_validation_2021} is available at \footnote{ \url{https://github.com/mulles/Doc_Projekt-Labor_SOC} }. As the SoC can only be measured indirectly, it has to be deduced from available measurements.  %TODO at citations here that prove this
+The charge controller exposes battery current and voltage measurements once a second for this purpose. \\%TODO make a table out of this list or some other structure with label which can be referenced in implementations
 There are three main approaches for estimating the SoC: model-based, data-driven, coulomb-counting w/ Open circuit voltage (OCV) \cite{espedal2021current}. Best results seems to be achieved with combining the approaches to profit from their different strengths.
 
 %\section{Background}
 
 \subsubsection{Current integration method - Coulomb Counting /w OCV }
+\label{section:CoulombCounting}
 
 Seems the most simple way to define SoC:
 
 \begin{equation}
 z(t) = z(0) - \frac{1}{{Q_{C}}}\int_{0}^{\Delta t} {i(t)\ dt}
+\label{equations:CoulombCounting}
 \end{equation}
 where: 
 \begin{tabbing}
@@ -32,7 +42,7 @@ $\Delta t$\> = the time interval between two current measurements
 \end{tabbing}
 
 The initial SoC $z(0)$ is determined by consulting a OCV-SoC lookup table. Starting from there the charge in relation to total capacity entering and leaving the battery is subtracted from SoC. This method has several disadvantages: \\
-
+%TODO make a table out of this list or some other structure with label which can be referenced
 -The initial SoC incorporates already an error, which won't be corrected till recalibration \\
 -Error in counting charges and measurement errors accumulate quickly\\
 -The algorithms only recalibrate reliably on full charge, which especially in solar systems does not occur regularly, producing awful SoC till recalibration. \\ %TODO at citations here that prove this
@@ -180,6 +190,7 @@ TODO Remove \ref{fig:StateMaschineMartinLibreSolar3}  and produce one that fits 
 \pagebreak
 
 \subsubsection{Equivalent circuit based models}
+\label{section:Equivalentcircuitbasedmodels}
 \
 \
 \
@@ -194,6 +205,7 @@ The figure \ref{fig:ECMThevinModel} shows an empirical model known as Thévenin 
 
 \begin{equation}
 {v}(t) = {OCV}(z(t)) - {R}_{1} {i}_{R_1}(t) - {R}_{0} i(t)
+\label{equation:ECM}
 \end{equation}
 where: 
 \begin{tabbing}
@@ -209,6 +221,7 @@ battery test data for example that of a hybrid pulse power characterization (HPP
 Other empirical models are the auto regressive exogenous (ARX) model and dual polarisation (DP) model %TODO \cite{26. Xia, B.; Zheng, W.; Zhang, R.; Lao, Z.; Sun, Z. A Novel Observer for Lithium-Ion Battery State of Charge Estimation in Electric Vehicles Based on a Second-Order Equivalent Circuit Model. Energies 2017, 10, 1150. [CrossRef}.
 
 \subsubsection{Physics based models}
+\label{section:Physics based models}
 
 As Gregory Plettv puts it in his lectures notes of course ECE5720  \footnote{ \url{http://mocha-java.uccs.edu/ECE5720/ECE5720-Notes02.pdf}} :  "Battery management and controls using physics-based models is a major focus of our present research efforts and (I hope) of a future
 course" in 2015. The first papers on the topic are available now \cite{9477587}, but physics based models (PBM) still are hard to implement and not much material or software code is available. Thus, the ECM model is preferred for now. Moreover, the PBM based models have a higher computational complexity than
@@ -216,10 +229,20 @@ empirical models, making it non suitable for the mppt-1210-hus micro-controller 
 
 
 \subsubsection{Data-driven}
+\label{section:Data-driven}
 
 These approaches are based on artificial
 intelligence (AI) and need good training data and the right training parameters. Combined with PBM's it is a very promising research field \cite{9477587}, which first successes to reduce the computational complexity so online estimation of SoC on MCU is	 possible.
 
+
+%\chapter{Hardware Setup for validation}
+
+%\begin{figure}[!ht]
+%\includegraphics{SOC_Setup.png}
+%\caption{\label{fig:SoCSetup} Setup to verify SoC Algorithm}
+%\end{figure}
+
+%TODO this might just be ignored for now, as it would double the size of this document. It could be used so the user gets an idea of how the system looks like. Maybe a more simple schematic or photo incorpated in the introduction \ref{chap:Introduction}  would make more sense. The setup might not even have been used to produce data for this project, more to learn about the system the algo has been developed for.
 
 \chapter{Implementation}
 \label{chap:Implementation}
@@ -227,39 +250,63 @@ intelligence (AI) and need good training data and the right training parameters.
 %3 steps for SoC Algo implementation: \\
 %1) model design\\  2) identification of model parameters \\ 3) SoC determination \\
 
-It is popular to combine any of the approaches introduced in \ref{chap:Introduction} with a kalman filter (KF) in order to reduce the influence of white (uncorrelated) noise in measurements and to combine voltage and current measurments known as sensor fusion. The second principle make the algorithms resistent %TODO resilient bad choosen 
-model parameters.  %\cite{} a couple of papers making use of KF in combinations with different approaches. 
-%TODO cite \url{https://okrasolar.com/blog/building-a-lightweight-state-of-charge-algorithm/} 
-The kalman filter is a great tool to base a SoC algorithms on, as it is clearly defined by mathematical theories than by an arbitrary algorithm designed by a programmer. One needs to use a extend kalman filter as the problem to solve is non linear, TODO explain why it is non linear. 
+It is popular to combine %hybrid approach 
+any of the approaches introduced in \ref{chap:Introduction} with a kalman filter (KF) in order to reduce the influence of white (uncorrelated) noise in measurements and to combine voltage and current measurements known as sensor fusion. The second principle makes the algorithm resilient %TODO resistant 
+to inaccurately chosen ECM parameters. In this project the combination of coulomb counting \ref{section:CoulombCounting} and ECM \ref{section:Equivalentcircuitbasedmodels} has been chosen. \\ %\cite{} a couple of papers making use of KF in combinations with different approaches see  As for battery states estimation, the Kalman filter family has been extensively used to estimate the SOC, e.g., the extended Kalman filter (EKF). of paper Online Parameters Identification and State of Charge Estimation for Lithium-Ion Battery Using Adaptive Cubature Kalman Filter
+%TODO cite \url{https://okrasolar.com/blog/building-a-lightweight-state-of-charge-algorithm/}  
+\\
+As the  ECM's equation \ref{equation:ECM}  is non-linear an extended kalman filter (EKF) needs to be used. The EKF linearizes the non-linear system by calculating the Jacobian matrix, which is the Taylor series expansions of first order.  %\cite{Online Parameters Identification and State of Charge Estimation for Lithium-Ion Battery Using Adaptive Cubature Kalman Filter}. 
+\\
 
-"this algorithm resilient to unpredictable or noisy data, gaps in data, or inaccurately initialized parameters."
+\section{EFK implementation fork}
+\label{Fork}
 
-"A sigma-point Kalman filter is further used to manage inaccuracies generated by the reduction process and experimental-related issues such as measurement error (noise) in the current and voltage sensors."
+A good step by step guide to implement the extended kalman filter is \cite{rzepka2021implementing}. The algorithm refined in this project is based on a fork of the algorithm named $kalman-soc$\footnote{ \url{https://github.com/mulles/kalman-soc}} designed by Matthew Johnston for the company okra-solar. 
+
+Some refinements consists of improvements or adaptions to libre.solar use case and code base. \\
 
-
-Link to source code. \footnote{ \url{https://github.com/mulles/kalman-soc} } The algo is a fork of a kalman-soc from  Matthew Johnston of the company okra-solar. 
-Some adjustments have been made to improve or adapt it to libre.solar use case and code base.  \\
-
+%TODO verify if this it completely wrong: -Works without the input of a Equivalent Circuit Model (ECM) specific to the physical battery, which would need to be parameterized doing advanced measurements during charging and discharging of the battery. 
+
+
+%TODO make a table out of this list or some other structure with label which can be referenced
 Changelog: 
 
 -adoption of libre solar code style guide 
 -change of energy counting to coulomb counting
 -use of float instead of integer in order to guarantee correct calculations, with no overflow. 
--exact changes are traceable with the commits to the fork. \\
+note exact changes are traceable with the commits to the fork. \\
 \
 \
 \
 
 
-{System's dynamic model} \\
+\subsection{Equations defining the EKF}
+\label{System's dynamic model}
 
-The $f() $ function is defined as the $ f({\boldsymbol {x}}_{k},{\boldsymbol {i}}_{k},\Delta{t}) = {x}_{k} - \frac{1}{{Q_{C}}}\int_{0}^{\Delta t} {i_{k}\ dk} $ or more discrete $f({x}_{k},{i}_{k},\Delta{t}) = {x}_{k} - \frac{\Delta t}{Q_{C}} i_{k} $, thus current measurement $ {i}_{k} $ \\
 
-The $h({\boldsymbol {x}}_{{k}})$ function is defined as the OCV lookup table. A general OCV lookup table for the battery chemistry can be used or for better results a specific OCV lookup table established by offline measurements for the given battery should be used. \\
-To further improve the OCV prediction a correction of it can be performed by a equivalent circuit model (ECM) of the battery feed by the current measurement used to predict the SoC: 
+The EKF consist of two equations describing the system the SoC is to be predicted for:
+\begin{equation}
+  {\boldsymbol {x}}_{k+1}=f({\boldsymbol {x}}_{k},{\boldsymbol {i}}_{k})+ {\boldsymbol {w}}_{k}  \ (state\ space\ equation aka observation model aka state transition ?)  
+\end{equation}
+\begin{equation}
+  \boldsymbol  y_{k}=h({\boldsymbol  {x}}_{{k}})+{\boldsymbol  {v}}_{{k}}  \ \ \ \ \ \ \ \ \ \ \  \ (control\ output\ equation aka control-input model)  \\
+\end{equation}
+where: 
+\begin{tabbing}
+\phantom{$v(t)  \  \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ $}\= \kill
+$f({\boldsymbol {x}}_{k},{\boldsymbol {i}}_{k},\Delta{t})$\> =  \ $ {x}_{k} - \frac{\Delta t}{Q_{C}} i_{k} $ \ \ \ \ (discrete coulomb counting equation \ref{equations:CoulombCounting} ) \\
+$h({\boldsymbol {x}}_{{k}})$\> = $OCV(z_{k})$ \\ %TODO check if it is not ECM? 
+$y_{k}$\> =  battery voltage \\
+$i_{k}$\> =   battery current  \\ %TODO correct ? 
+$x_{k}$\> = the discrete SoC  \\ %TODO correct ? 
+$w_{k}$\> = noise    \\ %TODO  correct ? 
+$v_{k}$\> = noise    \\ %TODO  correct ?
+\end{tabbing}
+note that in some literature's  $z_{k} \equiv x_{k}$  and  $i_{k} \equiv u_{k}$
+%TODO be aware of what is a vector and what is not.
 
 \begin{equation}
-{v}_{k} = {D} \ {OCV}({z}_{k}) + C {x}_{k}  +  D {i}_{k}  
+{v}_{k} = {D} \ {OCV}({z}_{k}) + C {x}_{k}  +  D {i}_{k}   %TODO compare with source code
 \end{equation}
 where:
 \begin{tabbing}
@@ -268,69 +315,16 @@ $C$\> =   $C= [0, -R_1, -R_2, ..., M] $ \\
 $D$\> = $R_0 $    \\
 \end{tabbing}
 
+\subsection{Parametrization of the ECM model and other parameters inside the EFK}
+\label{Parametrization}
 
-\section{Hardware Setup for validation}
-
-\begin{figure}[!ht]
-\includegraphics{SOC_Setup.png}
-\caption{\label{fig:SoCSetup} Setup to verify SoC Algorithm}
-\end{figure}
+The parametrization is particularly challenging. It is typically done offline \footnote{not generated by the micro controller unit (MCU) the algorithm is deployed to, thus not on the system running the final algorithm. Offline means on more advanced hardware, which is not available in the final product. See \url{https://en.wikipedia.org/wiki/Online_model} } and requires quite advanced equipment.
 
 
-
-TODO Migrate from the other document.
-
-TODO What resolution is necessary. 
-
-\section{EKF Implementation}
-date: (4d)
-
-A good step by step guide to implement the extended kalman filter is \cite{rzepka2021implementing}.
-
-To design an extended kalman filter algorithm three steps are necessary:
-1.The control-input model and the observation model need to be well designed. 
-2.The constants inside the models expressed as matrices need to be defined, which is as well known as parametrization of the model.  
-3.The model needs to be implemented as code running on embedded systems. 
-
-The key to success for a good SoC is a good definition of both models and a good parametrization. The implementation is independent of the use case and depends on the skills of the programmer, in his  hands lies the optimization of the  code. In case no FPU is available on the micro-controller unit (MCU) fix point arithmetic might be an option.  
-
-Particularly challenging is the parametrization, which is typically done offline \footnote{not generated by the micro controller unit (MCU) the algorithm is deployed to, thus not on the system running the final algorithm. Offline means on more advanced hardware, which is not available in the final product. See \url{https://en.wikipedia.org/wiki/Online_model} } and requires quite advanced equipment. The Adaptive extend Kalman Filter (AEKF) is an option, where the parameters are determined online, but still AEKF needs to be initialized with parameters not necessary fitting all batteries of a given chemistry, because of different capacities or tolerances and specific designs. 
-TODO It needs to be researched if it only affects the convergence time or if convergence is not reached at all? A further advantage of an adaptive filter is that the state of health (SOH) can be determined along the side. 
-When simple observation and control-input models are used as in the okra kalman-soc algorithm, the parametrization might be much easier?
-TODO to check if the initial parameters, in this case OCV in function of SoC data can be used generally or only on the batteries, the data has been generated with. \\
-
-\textbf{Citations concerning the on/off-line parametrization} \\
-
-Offline parametrization: \\
-'As a result, many experimental pretests investigating the
-effects of the internal and external conditions of a battery on its parameters are required, since the
-accuracy of state estimation depends on the quality of the information regarding battery parameter
-changes'
-
-'Therefore, some tests data must be available in 
-advance to find the parameters of these models.'
-\cite{hussein2011overview}  \\ \\ \\ \\
-
-Gregory Plett says: \\
-'Two possible approaches: \\
-
-First, an algorithm might somehow adapt the parameter values of the model during operation to match presently observed current–voltage behaviors; but, this \textbf{must be done very carefully to avoid making the model unstable or physically nonmeaningful}. \\
-
-Alternately, a set of models could be pre-computed at different feasible aging points and the model from this set that most closely predicts presently observed current–voltage dynamics could be selected from the set. This second approach guarantees stable and physically meaningful models since all models in the pre-computed set meet these criteria. We propose such an approach here.' 
----https://www.sciencedirect.com/science/article/abs/pii/S2352152X18301385?via%3Dihub
-In order to have online first algo, the parametrization needs to be done online!. 
-
-As the OCV curve is non-linear the kalman filter can not be used. 
-
-state transition and observation models
-
-
-\subsection{Definition Mathematics Equations }
+\subsection{EKF inner functioning }
  
 TODO Make a diagram where you can see the input output and steps\\
 
-%\begin{equation}
-%\end{equation}	
 
 Most general form of  state observer equations: \\
 $ x_{k+1}=Ax_{k}+Bu_{k} $ (state observer equation) \\
@@ -342,12 +336,6 @@ $A = I$  identity matrix f.i $I_{2}=\begin{bmatrix}1&0\\0&1\end{bmatrix}$ \\
 $B = \begin{bmatrix}-\frac{\Delta t}{{Q_{C}}}&0\\0&1\end{bmatrix} $  is \textbf{the control-input model}, deduced from  $f({\boldsymbol {x}}_{k},{\boldsymbol {i}}_{k},\Delta t) =  {x}_{k} - \frac{1}{{Q_{C}}}\int_{0}^{\Delta t} {i_{k}\ dk} $ \\
 $ C = [0, -R_1, -R_2, ..., M] = H(x_k) $ and $H(x_k) $is the \textbf{observation model} , which maps the state space into the observed space and TODO understand the relationship to $ h(x_k)$ \\ 
 $ D = R_0 $ \\
-
-
-Most general form of Kalman Filter equations: \\
-
-$  {\boldsymbol {x}}_{k+1}=f({\boldsymbol {x}}_{k},{\boldsymbol {u}}_{k})+ {\boldsymbol {w}}_{k} $ \ (State Space equation)  \\
-$  {\boldsymbol  {z}}_{{k}}=h({\boldsymbol  {x}}_{{k}})+{\boldsymbol  {v}}_{{k}} $ \ \ \ \ \ \ \ \ \ \ \  \ (Output equation)  \\
 
 
 $ {\hat  {x}}_{k+1}=\left(A-BK\right){\hat  {x}}_{k}+L\left(y_{k}-{\hat  {y}}_{k}\right) $  ( here $u_{k}$ seems missing)\\
@@ -402,18 +390,7 @@ ${\boldsymbol  {P}}_{{k|k}}=({\boldsymbol  {I}}-{\boldsymbol  {K}}_{{k}}{{{\bold
 
 
 
-\subsection{Kalman-SoC}
-A Fork of Okra-Solar Algorithm. \
 
-Features: \
-
--Works without the input of a Equivalent Circuit Model (ECM) specific to the physical battery, which would need to be parameterized doing advanced measurements during charging and discharging of the battery. 
-
--Inputs: Current and Voltage Measurements and OCV Lookup Table
-
--Outputs: SoC in \%Wh
-
-TODO Discuss the Code Snippets? But Some Code in Appendix or reference Github Repo only? 
 \chapter{Validation}
 
 2 Arten von Datensätze: 
@@ -489,7 +466,40 @@ fig.write_image("overview.pdf")
 \caption{\label{fig:overview} Overview of data}
 \end{figure}
 
-\chapter{Outlook}
+\chapter{Conclusion}
+
+The key to success for a good SoC is a good definition of both models and a good parametrization. The implementation is independent of the use case and depends on the skills of the programmer, in his  hands lies the optimization of the  code. In case no FPU is available on the micro-controller unit (MCU) fix point arithmetic might be an option. 
+The Adaptive extend Kalman Filter (AEKF) is an option, where the parameters are determined online, but still AEKF needs to be initialized with parameters not necessary fitting all batteries of a given chemistry, because of different capacities or tolerances and specific designs. 
+TODO It needs to be researched if it only affects the convergence time or if convergence is not reached at all? A further advantage of an adaptive filter is that the state of health (SOH) can be determined along the side. 
+When simple observation and control-input models are used as in the okra kalman-soc algorithm, the parametrization might be much easier?
+TODO to check if the initial parameters, in this case OCV in function of SoC data can be used generally or only on the batteries, the data has been generated with. \\
+
+\textbf{Citations concerning the on/off-line parametrization} \\
+
+"A sigma-point Kalman filter is further used to manage inaccuracies generated by the reduction process and experimental-related issues such as measurement error (noise) in the current and voltage sensors."
+
+Offline parametrization: \\
+'As a result, many experimental pretests investigating the
+effects of the internal and external conditions of a battery on its parameters are required, since the
+accuracy of state estimation depends on the quality of the information regarding battery parameter
+changes'
+
+'Therefore, some tests data must be available in 
+advance to find the parameters of these models.'
+\cite{hussein2011overview}  \\ \\ \\ \\
+
+Gregory Plett says: \\
+'Two possible approaches: \\
+
+First, an algorithm might somehow adapt the parameter values of the model during operation to match presently observed current–voltage behaviors; but, this \textbf{must be done very carefully to avoid making the model unstable or physically nonmeaningful}. \\
+
+Alternately, a set of models could be pre-computed at different feasible aging points and the model from this set that most closely predicts presently observed current–voltage dynamics could be selected from the set. This second approach guarantees stable and physically meaningful models since all models in the pre-computed set meet these criteria. We propose such an approach here.' 
+---https://www.sciencedirect.com/science/article/abs/pii/S2352152X18301385?via%3Dihub
+In order to have online first algo, the parametrization needs to be done online!. 
+
+
+
+\subsection{Outlook} 
 
 Promising articles and/or methods for online parameter estimation: \\ 
 
