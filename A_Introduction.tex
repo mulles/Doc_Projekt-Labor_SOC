@@ -295,14 +295,13 @@ where:
 \begin{tabbing}
 \phantom{$v(t)  \  \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ $}\= \kill
 $f({\boldsymbol {x}}_{k},{\boldsymbol {i}}_{k},\Delta{t})$\> =  \ $ {x}_{k} - \frac{\Delta t}{Q_{C}} i_{k} $ \ \ \ \ (discrete coulomb counting equation \ref{equations:CoulombCounting} ) \\
-$h({\boldsymbol {x}}_{{k}})$\> = $OCV(z_{k})$ \\ %TODO check if it is not ECM? 
+$h({\boldsymbol {x}}_{{k}})$\> = $OCV(z_{k})$ \\  $ \boldsymbol{h} = (Voltage[i] + Voltage[i - 1]) * multiplier / 2 + (batteryAmps * x[1] / 100) + x[2] / 100$\\ %TODO check if it is not ECM? 
 $y_{k}$\> =  battery terminal voltage,  $v_{k}$ is common  \\
 $i_{k}$\> =   battery current, $u_{k}$ is common  \\ %TODO correct ? 
 $x_{k}$\> = the discrete SoC, in literature $z_{k}$ is common \\ %TODO correct ? 
 $w_{k}$\> = noise    \\ %TODO  correct ? 
 $v_{k}$\> = noise    \\ %TODO  correct ?
-\end{tabbing}
-note that in some literature's  $z_{k} \equiv x_{k}$  and  $i_{k} \equiv u_{k}$
+\end{tabbing}	
 %TODO be aware of what is a vector and what is not.
 
 \begin{equation}
