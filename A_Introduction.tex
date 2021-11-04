@@ -204,14 +204,15 @@ TODO Remove \ref{fig:StateMaschineMartinLibreSolar3}  and produce one that fits 
 The figure \ref{fig:ECMThevinModel} shows an empirical model known as Thévenin model or equivalent circuit model (ECM), adhering to the equation: 
 
 \begin{equation}
-{v}(t) = {OCV}(z(t)) - {R}_{1} {i}_{R_1}(t) - {R}_{0} i(t)
+{v}(t) = {OCV}(z(t))  - {R}_{0} i(t) - {R}_{1} {i}_{R_1}(t) 
 \label{equation:ECM}
 \end{equation}
 where: 
 \begin{tabbing}
 \phantom{$v(t)  \  \ \ \ \ \ \ \ \ \ \ \ $}\= \kill
 $v$\> =  voltage measured on battery terminals under load   \\
-$z  $\> = the SoC  \\
+$z  $\> =  SoC  \\
+$v_	1$\> =  ${R}_{1} {i}_{R_1}(t)$ \\
 $OCV $\>  = a function based on a SoC-OCV-lookup table \\
 $R_1,C_1,R_0$\> = don't exist as physical components inside the battery, their values are chosen to fit  \\
 battery test data for example that of a hybrid pulse power characterization (HPPC) battery test  \\ % TODO  \cite{bibid} \url{http://mocha-java.uccs.edu/ECE5720/ECE5720-Notes02.pdf} page 2
@@ -251,17 +252,16 @@ intelligence (AI) and need good training data and the right training parameters.
 %1) model design\\  2) identification of model parameters \\ 3) SoC determination \\
 
 It is popular to combine %hybrid approach 
-any of the approaches introduced in \ref{chap:Introduction} with a kalman filter (KF) in order to reduce the influence of white (uncorrelated) noise in measurements and to combine voltage and current measurements known as sensor fusion. The second principle makes the algorithm resilient %TODO resistant 
-to inaccurately chosen ECM parameters. In this project the combination of coulomb counting \ref{section:CoulombCounting} and ECM \ref{section:Equivalentcircuitbasedmodels} has been chosen. \\ %\cite{} a couple of papers making use of KF in combinations with different approaches see  As for battery states estimation, the Kalman filter family has been extensively used to estimate the SOC, e.g., the extended Kalman filter (EKF). of paper Online Parameters Identification and State of Charge Estimation for Lithium-Ion Battery Using Adaptive Cubature Kalman Filter
+any of the approaches introduced in \ref{chap:Introduction} with a kalman filter (KF) in order to reduce the influence of white (uncorrelated) noise in measurements and to combine voltage and current measurements known as sensor fusion. The second principle makes the algorithm resilient to inaccurately chosen ECM parameters. In this project the combination of coulomb counting \ref{section:CoulombCounting} and ECM \ref{section:Equivalentcircuitbasedmodels} has been chosen. \\ %\cite{} a couple of papers making use of KF in combinations with different approaches see  As for battery states estimation, the Kalman filter family has been extensively used to estimate the SOC, e.g., the extended Kalman filter (EKF). of paper Online Parameters Identification and State of Charge Estimation for Lithium-Ion Battery Using Adaptive Cubature Kalman Filter
 %TODO cite \url{https://okrasolar.com/blog/building-a-lightweight-state-of-charge-algorithm/}  
 \\
 As the  ECM's equation \ref{equation:ECM}  is non-linear an extended kalman filter (EKF) needs to be used. The EKF linearizes the non-linear system by calculating the Jacobian matrix, which is the Taylor series expansions of first order.  %\cite{Online Parameters Identification and State of Charge Estimation for Lithium-Ion Battery Using Adaptive Cubature Kalman Filter}. 
 \\
 
-\section{EFK implementation fork}
+\section{EFK implementation}
 \label{Fork}
 
-A good step by step guide to implement the extended kalman filter is \cite{rzepka2021implementing}. The algorithm refined in this project is based on a fork of the algorithm named $kalman-soc$\footnote{ \url{https://github.com/mulles/kalman-soc}} designed by Matthew Johnston for the company okra-solar. 
+A reasonable step by step guide to implement the EKF is \cite{rzepka2021implementing}. The algorithm refined in this project is based on a fork of the algorithm named $kalman-soc$\footnote{ \url{https://github.com/mulles/kalman-soc}} designed by Matthew Johnston for the company okra-solar. 
 
 Some refinements consists of improvements or adaptions to libre.solar use case and code base. \\
 
@@ -272,6 +272,7 @@ Some refinements consists of improvements or adaptions to libre.solar use case a
 Changelog: 
 
 -adoption of libre solar code style guide 
+-adoption of TinyEKF notation  \footnote{\url{https://github.com/simondlevy/TinyEKF/}} \\
 -change of energy counting to coulomb counting
 -use of float instead of integer in order to guarantee correct calculations, with no overflow. 
 note exact changes are traceable with the commits to the fork. \\
@@ -280,104 +281,103 @@ note exact changes are traceable with the commits to the fork. \\
 \
 
 
-\subsection{Equations defining the EKF}
+\subsection{Definition of EFK equations}
 \label{System's dynamic model}
+
+
+%Most general equation of extended kalman filter EKF: \\
+%
+%$ \mathbf {x}_{k}=f(\mathbf {x} _{k-1},\mathbf {u}_{k})+\mathbf {w}_{k}\ $ (state transition model) \\
+%$\mathbf {z}_{k}=h(\mathbf {x} _{k})+\mathbf {v}_{k}$ \ \ \ \ \ \ \ \ \ \ \  \ (observation model)  \\
+%\emph{f} ->  predicted state from the previous estimate  \\
+%\emph{h} ->  compute the predicted measurement from the predicted state \\
 
 
 The EKF consist of two equations describing the system the SoC is to be predicted for:
 \begin{equation}
-  {\boldsymbol {x}}_{k+1}=f({\boldsymbol {x}}_{k},{\boldsymbol {i}}_{k})+ {\boldsymbol {w}}_{k}  \ (state\ space\ equation aka observation model aka state transition ?)  
+  {\boldsymbol {x}}_{k+1}=f({\boldsymbol {x}}_{k},{{i}}_{k})+ {\boldsymbol {w}}_{k}  \ (state\ space\ equation aka observation model aka state transition ?)  
 \end{equation}
 \begin{equation}
-  \boldsymbol  y_{k}=h({\boldsymbol  {x}}_{{k}})+{\boldsymbol  {v}}_{{k}}  \ \ \ \ \ \ \ \ \ \ \  \ (control\ output\ equation aka control-input model)  \\
+ y_{k}=h({\boldsymbol  {x}}_{{k}}, {i}_{k})+{\boldsymbol  {v}}_{{k}}  \ \ \ \ \ \ \ \ \ \ \  \ (control\ output\ equation aka control-input model)  \\
 \end{equation}
 where: 
 \begin{tabbing}
 \phantom{$v(t)  \  \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ $}\= \kill
-$f({\boldsymbol {x}}_{k},{\boldsymbol {i}}_{k},\Delta{t})$\> =  \ $ {x}_{k} - \frac{\Delta t}{Q_{C}} i_{k} $ \ \ \ \ (discrete coulomb counting equation \ref{equations:CoulombCounting} ) \\
-$h({\boldsymbol {x}}_{{k}})$\> = $OCV(z_{k})$ \\  $ \boldsymbol{h} = (Voltage[i] + Voltage[i - 1]) * multiplier / 2 + (batteryAmps * x[1] / 100) + x[2] / 100$\\ %TODO check if it is not ECM? 
+$\boldsymbol x_{k}$\> = $[SoC, R_0, v_1]$ \\ 
+$f({\boldsymbol {x}}_{k}, {i}_{k},)$\> =  \ $ {x}_{k}[0] - \frac{\Delta t}{Q_{C}} i_{k} $ \ \ \ \ (discrete coulomb counting equation \ref{equations:CoulombCounting} ) \\
+$h(\boldsymbol x,i_k) = OCV(SoC) + i_k R_0  +  v_1$ (discrete ECM equation \ref{equation:ECM})\\
 $y_{k}$\> =  battery terminal voltage,  $v_{k}$ is common  \\
-$i_{k}$\> =   battery current, $u_{k}$ is common  \\ %TODO correct ? 
-$x_{k}$\> = the discrete SoC, in literature $z_{k}$ is common \\ %TODO correct ? 
-$w_{k}$\> = noise    \\ %TODO  correct ? 
-$v_{k}$\> = noise    \\ %TODO  correct ?
+$i_{k}$\> =   battery current, $u_{k}$ is common  \\
+$w_{k}$\> = noise    \\ 
+$v_{k}$\> = measurement noise    \\
 \end{tabbing}	
-%TODO be aware of what is a vector and what is not.
+
+%\begin{equation}
+%{v}_{k} = {D} \ {OCV}({z}_{k}) + C {x}_{k}  +  D {i}_{k}   %TODO compare with source code
+%\end{equation}´
+%where:
+%\begin{tabbing}
+%\phantom{$v(t)  \  $}\= \kill
+%$C$\> =   $C= [0, -R_1, -R_2, ..., M] $ \\
+%$D$\> = $R_0 $    \\
+%\end{tabbing}
+
+This equations need to be linearized in order to apply the EKF to them. 
+
+This leaves us with the matrices defining the system : 
 
 \begin{equation}
-{v}_{k} = {D} \ {OCV}({z}_{k}) + C {x}_{k}  +  D {i}_{k}   %TODO compare with source code
+ \boldsymbol x_k = 
+  \begin{bmatrix}
+  SoC \\
+  R_0 \\
+  v_1
+  \end{bmatrix}   
+ \underbrace{  
+ \begin{bmatrix}
+ 1 & 0 & 0\\
+ 0 & 1 & 0\\
+ 0 & 0 & e^\frac{\Delta t}{R_1 C_1}
+ \end{bmatrix}}_{\boldsymbol F_k}
+ \underbrace{ 
+ \begin{bmatrix}
+ SoC \\
+ R_0 \\
+ v_1
+ \end{bmatrix}}_{\boldsymbol x_k}  
+ +
+ \underbrace{
+ \begin{bmatrix}
+ \frac{\Delta t}{Q_C} \\
+ 0 \\
+ R_1 (1-e^\frac{\Delta t}{R_1 C_1})
+ \end{bmatrix}}_{\boldsymbol B_k}  i_k
+  
 \end{equation}
-where:
-\begin{tabbing}
-\phantom{$v(t)  \  $}\= \kill
-$C$\> =   $C= [0, -R_1, -R_2, ..., M] $ \\
-$D$\> = $R_0 $    \\
-\end{tabbing}
 
-\subsection{Parametrization of the ECM model and other parameters inside the EFK}
-\label{Parametrization}
+\begin{equation}
+\boldsymbol H = \frac{h({\boldsymbol {x}}_{k}, {i}_{k},)} {d \boldsymbol {x}}  =  \frac{OCV(SoC) + i_k R_0  +  v_1}{d\boldsymbol {x}_{k}} = 
+\begin{bmatrix}
+ \frac{dOCV}{dSoC} &  i_k  & 1\\
+\end{bmatrix}
 
-The parametrization is particularly challenging. It is typically done offline \footnote{not generated by the micro controller unit (MCU) the algorithm is deployed to, thus not on the system running the final algorithm. Offline means on more advanced hardware, which is not available in the final product. See \url{https://en.wikipedia.org/wiki/Online_model} } and requires quite advanced equipment.
+\end{equation}
 
 
-\subsection{EKF inner functioning }
- 
-TODO Make a diagram where you can see the input output and steps\\
-
-
-Most general form of  state observer equations: \\
-$ x_{k+1}=Ax_{k}+Bu_{k} $ (state observer equation) \\
-$ y_{k}=Cx_{k}+dDu_{k} $ \ \ \  (output equation)\\ 
-
-$u_{k} \equiv i_{k}$ a control vector (input), defined as the measurement of current through the battery at time $k$. \\ 
-$y_{k} \equiv v_{k}$ an observation (or measurement), defined as a voltage measurement of the battery at time $k$. \\
-$A = I$  identity matrix f.i $I_{2}=\begin{bmatrix}1&0\\0&1\end{bmatrix}$ \\
-$B = \begin{bmatrix}-\frac{\Delta t}{{Q_{C}}}&0\\0&1\end{bmatrix} $  is \textbf{the control-input model}, deduced from  $f({\boldsymbol {x}}_{k},{\boldsymbol {i}}_{k},\Delta t) =  {x}_{k} - \frac{1}{{Q_{C}}}\int_{0}^{\Delta t} {i_{k}\ dk} $ \\
-$ C = [0, -R_1, -R_2, ..., M] = H(x_k) $ and $H(x_k) $is the \textbf{observation model} , which maps the state space into the observed space and TODO understand the relationship to $ h(x_k)$ \\ 
-$ D = R_0 $ \\
-
-
-$ {\hat  {x}}_{k+1}=\left(A-BK\right){\hat  {x}}_{k}+L\left(y_{k}-{\hat  {y}}_{k}\right) $  ( here $u_{k}$ seems missing)\\
-
-Predicted variables $ \hat{y}_{k}$ and $ \hat{x}_{k} $  are commonly denoted by a "hat" to distinguish them from  $ {y}_{k} $ and $ {x}(k) $  of the physical system. As the state of charge (SoC) denoted as $\hat{x}_{k} = SoC_{k}$  cannot be measured directly it is always a predicted variable, opposed to ${y}(k)$, which is the measured circuit voltage. Consequently $ \hat{y}_{k} = {v}_{k} $ is the predicted circuit voltage also known as measurable output: 
-
-$ {\hat{y}}_{k}=\left(C-DK\right){\hat{x}}_{k} $ 
-
-Input to the extend kalman filter (EKF) is current and voltage measurement and the period of time between these measurements. The initialization of the EKF outputs the initial estimate state of charge  ${x}_{k|k=0} $ another input to the EKF. 
-
-{System's dynamic model} \\
-The $f() $ function is defined as the $ f({\boldsymbol {x}}_{k},{\boldsymbol {i}}_{k},\Delta{t}) = {x}_{k} - \frac{1}{{Q_{C}}}\int_{0}^{\Delta t} {i_{k}\ dk} $ or more discrete $f({x}_{k},{i}_{k},\Delta{t}) = {x}_{k} - \frac{\Delta t}{Q_{C}} i_{k} $, thus current measurement $ {i}_{k} $ 
-The $h({\boldsymbol {x}}_{{k}})$ function is defined as the OCV lookup table. A general OCV lookup table for the battery chemistry can be used or for better results a specific OCV lookup established by offline measurements for  the given battery should be used. 
-To further improve the OCV prediction a correction of it can be performed by a equivalent circuit model (ECM) of the battery feeded by the current measurement used to predict the SoC: 
-$ {v}_{k} = {D} \ {OCV}({z}_{k}) + C {x}_{k}  +  D {i}_{k}  $ 
-with $ C = [0, -R_1, -R_2, ..., M] $ and $ D = R_0 $
-
--Measurement equation, input (measured voltage, OCV lookup table, current if the correction with a Enhanced Self-Correcting (ESC) Cell Model /ECM) -> output SOC)
-equation should be use standard letters: filterpy, wikipedia, gregoryPlett, Step by Step Guide
-
-After having defined the observation and control-input model as matrices and described their meaning in case of SoC estimation we proceed to the functioning of the EKF, which is typically divided into to steps, Predict and Update. 
-
-In the \textbf{predict} step a future state of charge estimate  $\hat x_{k+1}$ is predicted based on the current state of charge estimate $\hat x_k$ and the current $i_k$ during the period $\Delta t$ (between $k$ and $k+1$) by calculating $ \mathbf{\hat x_{k+1}=Ax_{k}+Bu_{k}} $ Moreover an estimate of the covariance $P_{k+1}x$ is calculated based on noise covariances $Q_k$ and current $P_k$ (wiki: a measure of the estimated uncertainty of the prediction of the system's state)  $\mathbf {P} _{k+1}=\mathbf {B} _{k}\mathbf {P} _{k}\mathbf {B} _{k}^{\textsf {T}}+\mathbf {Q} _{k} $
-
-In the \textbf{update} step  \\
-$ \mathbf {K} _{k}=\mathbf {P} _{k+1}\mathbf {H} _{k}^ \textsf {T} (  \mathbf \mathbf {H} _{k}\mathbf {P} _{k+1}\mathbf {H} _{k}^{\textsf {T}+\mathbf {R} _{k})^{-1}}$  is the kalman gain, which weights whether the SoC based on the measurement of the circuit voltage $v_k$ is more trusted than the SoC prediction based on current $i_k$ \\
-$ {\hat {\mathbf {x} }}_{k}=(\mathbf {I} -\mathbf {K} _{k}\mathbf {H} _{k})({\hat {\mathbf {x} }}_{k+1})+(\mathbf {K} _{k})(\mathbf {H} _{k}\mathbf {\hat x} _{k}+\mathbf {v} _{k}) $ TODO update $\hat x_k$ because one can not now want one want to calculate\\  
-
-$ \mathbf {P} _{k+1}=\left(\mathbf {I} -\mathbf {K} _{k+1}\mathbf {H} _{k+1}\right)\mathbf {P} _{k} $ update of the covariance TODO is $H_{k}$ the same as OCV? \\
-
-$\mathbf{R_k}$ the covariance of the observation noise  \\
-
-Most general equation of extended kalman filter EKF: \\
-
-$ \mathbf {x}_{k}=f(\mathbf {x} _{k-1},\mathbf {u}_{k})+\mathbf {w}_{k}\ $ (state transition model) \\
-$\mathbf {z}_{k}=h(\mathbf {x} _{k})+\mathbf {v}_{k}$ \ \ \ \ \ \ \ \ \ \ \  \ (observation model)  \\
-\emph{f} ->  predicted state from the previous estimate  \\
-\emph{h} ->  compute the predicted measurement from the predicted state \\
-
+\subsubsection{EFK Steps}
 
 \textbf{Predict} \\
 ${\displaystyle {\hat {\boldsymbol {x}}}_{k|k-1}=f({\hat {\boldsymbol {x}}}_{k-1|k-1},{\boldsymbol {u}}_{k})} $ \\
 ${\displaystyle {\boldsymbol {P}}_{k|k-1}={{\boldsymbol {F}}_{k}}{\boldsymbol {P}}_{k-1|k-1}{{\boldsymbol {F}}_{k}^{\top }}+{\boldsymbol {Q}}_{k}}$ \\
+
+$\hat{x}_k = f(\hat{x}_{k-1})$ \\
+    
+f(isBatteryInFloat, batteryMilliAmps, samplePeriodMilliSec, batteryCapacity) \\
+
+$P_k = A_{k-1} P_{k-1} A^T_{k-1} + Q_{k-1}$ -- updates _pPre \\
+    
+
+h(batteryMilliAmps)  ( update measurable (voltage) based on predicted state (SOC) ) \\
 
 \textbf{Update} \\
 ${\tilde  {{\boldsymbol  {y}}}}_{{k}}={\boldsymbol  {z}}_{{k}}-h({\hat  {{\boldsymbol  {x}}}}_{{k|k-1}})$ \\
@@ -385,6 +385,74 @@ ${\boldsymbol  {S}}_{{k}}={{{\boldsymbol  {H}}_{{k}}}}{\boldsymbol  {P}}_{{k|k-1
 ${\boldsymbol  {K}}_{{k}}={\boldsymbol  {P}}_{{k|k-1}}{{{\boldsymbol  {H}}_{{k}}^{\top }}}{\boldsymbol  {S}}_{{k}}^{{-1}}$ \\
 ${\hat  {{\boldsymbol  {x}}}}_{{k|k}}={\hat  {{\boldsymbol  {x}}}}_{{k|k-1}}+{\boldsymbol  {K}}_{{k}}{\tilde  {{\boldsymbol  {y}}}}_{{k}}$ \\
 ${\boldsymbol  {P}}_{{k|k}}=({\boldsymbol  {I}}-{\boldsymbol  {K}}_{{k}}{{{\boldsymbol  {H}}_{{k}}}}){\boldsymbol  {P}}_{{k|k-1}}$ \\
+
+
+
+
+$G_k = P_k H^T_k (H_k P_k H^T_k + R)^{-1}$
+
+ $\hat{x}_k = \hat{x_k} + G_k(z_k - h(\hat{x}_k))$
+ 
+
+$P_k = (I - G_k H_k) P_k$
+
+ 
+
+
+
+\subsection{Parametrization of the ECM model and other parameters inside the EFK}
+\label{Parametrization}
+
+The parametrization is particularly challenging. It is typically done offline \footnote{not generated by the micro controller unit (MCU) the algorithm is deployed to, thus not on the system running the final algorithm. Offline means on more advanced hardware, which is not available in the final product. See \url{https://en.wikipedia.org/wiki/Online_model} } and requires quite advanced equipment.
+
+%
+%\subsection{EKF inner functioning }
+% 
+%TODO Make a diagram where you can see the input output and steps\\
+%
+%
+%Most general form of  state observer equations: \\
+%$ x_{k+1}=Ax_{k}+Bu_{k} $ (state observer equation) \\
+%$ y_{k}=Cx_{k}+dDu_{k} $ \ \ \  (output equation)\\ 
+%
+%$u_{k} \equiv i_{k}$ a control vector (input), defined as the measurement of current through the battery at time $k$. \\ 
+%$y_{k} \equiv v_{k}$ an observation (or measurement), defined as a voltage measurement of the battery at time $k$. \\
+%$A = I$  identity matrix f.i $I_{2}=\begin{bmatrix}1&0\\0&1\end{bmatrix}$ \\
+%$B = \begin{bmatrix}-\frac{\Delta t}{{Q_{C}}}&0\\0&1\end{bmatrix} $  is \textbf{the control-input model}, deduced from  $f({\boldsymbol {x}}_{k},{\boldsymbol {i}}_{k},\Delta t) =  {x}_{k} - \frac{1}{{Q_{C}}}\int_{0}^{\Delta t} {i_{k}\ dk} $ \\
+%$ C = [0, -R_1, -R_2, ..., M] = H(x_k) $ and $H(x_k) $is the \textbf{observation model} , which maps the state space into the observed space and TODO understand the relationship to $ h(x_k)$ \\ 
+%$ D = R_0 $ \\
+%
+%
+%$ {\hat  {x}}_{k+1}=\left(A-BK\right){\hat  {x}}_{k}+L\left(y_{k}-{\hat  {y}}_{k}\right) $  ( here $u_{k}$ seems missing)\\
+%
+%Predicted variables $ \hat{y}_{k}$ and $ \hat{x}_{k} $  are commonly denoted by a "hat" to distinguish them from  $ {y}_{k} $ and $ {x}(k) $  of the physical system. As the state of charge (SoC) denoted as $\hat{x}_{k} = SoC_{k}$  cannot be measured directly it is always a predicted variable, opposed to ${y}(k)$, which is the measured circuit voltage. Consequently $ \hat{y}_{k} = {v}_{k} $ is the predicted circuit voltage also known as measurable output: 
+%
+%$ {\hat{y}}_{k}=\left(C-DK\right){\hat{x}}_{k} $ 
+%
+%Input to the extend kalman filter (EKF) is current and voltage measurement and the period of time between these measurements. The initialization of the EKF outputs the initial estimate state of charge  ${x}_{k|k=0} $ another input to the EKF. 
+%
+%{System's dynamic model} \\
+%The $f() $ function is defined as the $ f({\boldsymbol {x}}_{k},{\boldsymbol {i}}_{k},\Delta{t}) = {x}_{k} - \frac{1}{{Q_{C}}}\int_{0}^{\Delta t} {i_{k}\ dk} $ or more discrete $f({x}_{k},{i}_{k},\Delta{t}) = {x}_{k} - \frac{\Delta t}{Q_{C}} i_{k} $, thus current measurement $ {i}_{k} $ 
+%The $h({\boldsymbol {x}}_{{k}})$ function is defined as the OCV lookup table. A general OCV lookup table for the battery chemistry can be used or for better results a specific OCV lookup established by offline measurements for  the given battery should be used. 
+%To further improve the OCV prediction a correction of it can be performed by a equivalent circuit model (ECM) of the battery feeded by the current measurement used to predict the SoC: 
+%$ {v}_{k} = {D} \ {OCV}({z}_{k}) + C {x}_{k}  +  D {i}_{k}  $ 
+%with $ C = [0, -R_1, -R_2, ..., M] $ and $ D = R_0 $
+%
+%-Measurement equation, input (measured voltage, OCV lookup table, current if the correction with a Enhanced Self-Correcting (ESC) Cell Model /ECM) -> output SOC)
+%equation should be use standard letters: filterpy, wikipedia, gregoryPlett, Step by Step Guide
+%
+%After having defined the observation and control-input model as matrices and described their meaning in case of SoC estimation we proceed to the functioning of the EKF, which is typically divided into to steps, Predict and Update. 
+%
+%In the \textbf{predict} step a future state of charge estimate  $\hat x_{k+1}$ is predicted based on the current state of charge estimate $\hat x_k$ and the current $i_k$ during the period $\Delta t$ (between $k$ and $k+1$) by calculating $ \mathbf{\hat x_{k+1}=Ax_{k}+Bu_{k}} $ Moreover an estimate of the covariance $P_{k+1}x$ is calculated based on noise covariances $Q_k$ and current $P_k$ (wiki: a measure of the estimated uncertainty of the prediction of the system's state)  $\mathbf {P} _{k+1}=\mathbf {B} _{k}\mathbf {P} _{k}\mathbf {B} _{k}^{\textsf {T}}+\mathbf {Q} _{k} $
+%
+%In the \textbf{update} step  \\
+%$ \mathbf {K} _{k}=\mathbf {P} _{k+1}\mathbf {H} _{k}^ \textsf {T} (  \mathbf \mathbf {H} _{k}\mathbf {P} _{k+1}\mathbf {H} _{k}^{\textsf {T}+\mathbf {R} _{k})^{-1}}$  is the kalman gain, which weights whether the SoC based on the measurement of the circuit voltage $v_k$ is more trusted than the SoC prediction based on current $i_k$ \\
+%$ {\hat {\mathbf {x} }}_{k}=(\mathbf {I} -\mathbf {K} _{k}\mathbf {H} _{k})({\hat {\mathbf {x} }}_{k+1})+(\mathbf {K} _{k})(\mathbf {H} _{k}\mathbf {\hat x} _{k}+\mathbf {v} _{k}) $ TODO update $\hat x_k$ because one can not now want one want to calculate\\  
+%
+%$ \mathbf {P} _{k+1}=\left(\mathbf {I} -\mathbf {K} _{k+1}\mathbf {H} _{k+1}\right)\mathbf {P} _{k} $ update of the covariance TODO is $H_{k}$ the same as OCV? \\
+%
+%$\mathbf{R_k}$ the covariance of the observation noise  \\
+
 
 
 
