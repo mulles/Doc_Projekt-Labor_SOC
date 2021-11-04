@@ -140,47 +140,17 @@ savefig('OCVLion.pdf', bbox_inches='tight')
 
 \pagebreak
 
-The existing SoC function $Charger::update\_soc$ \footnote{\url{https://github.com/LibreSolar/charge-controller-firmware/blob/5196694e42c38eee18ab25e65bd51ec578eba101/src/bat_charger.cpp\#L325}} embebbed in mppt-1210-hus uses OCV-SoC-lookup function based on linear interpolation of 
+The existing SoC function $Charger::update\_soc$  \footnote{\url{https://github.com/LibreSolar/charge-controller-firmware/blob/5196694e42c38eee18ab25e65bd51ec578eba101/src/bat_charger.cpp\#L325}} \ref{code:libreSolarSoC} embebbed in mppt-1210-hus uses OCV-SoC-lookup function based on linear interpolation of 
 $ocv\_empty$ and $ocv\_full$:
 
+%TODO reference code appendix
 
-
-\begin{verbatim}
-void Charger::update_soc(BatConf *bat_conf)
-{
-    static int soc_filtered = 0;       // SOC / 100 for better filtering
-
-    if (fabs(port->current) < 0.2) {
-        int soc_new = (int)((port->bus->voltage - bat_conf->ocv_empty) /
-                   (bat_conf->ocv_full - bat_conf->ocv_empty) * 10000.0);
-
-        if (soc_new > 500 && soc_filtered == 0) {
-            // bypass filter during initialization
-            soc_filtered = soc_new;
-        }
-        else {
-            // filtering to adjust SOC very slowly
-            soc_filtered += (soc_new - soc_filtered) / 100;
-        }
-
-        if (soc_filtered > 10000) {
-            soc_filtered = 10000;
-        }
-        else if (soc_filtered < 0) {
-            soc_filtered = 0;
-        }
-        soc = soc_filtered / 100;
-    }
-
-    discharged_Ah += -port->current / 3600.0F;   // charged current is positive: change sign
-}
-\end{verbatim}
 
 
 
 \begin{figure}
 \centering
-\includegraphics{StateMaschineMartinLibreSolar3-s2.0-B9780444595133000157-f15-06ab-9780444595133.jpg}
+\includegraphics[width=15cm]{StateMaschineMartinLibreSolar3-s2.0-B9780444595133000157-f15-06ab-9780444595133.jpg}
 \caption{\label{fig:StateMaschineMartinLibreSolar3} State maschine libre.solar}
 \end{figure}
 TODO Remove \ref{fig:StateMaschineMartinLibreSolar3}  and produce one that fits Libre.solar Algo maybe cite \url{https://www.sciencedirect.com/topics/engineering/coulomb-counting}  but it does not seems to be a good reference. 
@@ -196,7 +166,16 @@ TODO Remove \ref{fig:StateMaschineMartinLibreSolar3}  and produce one that fits 
 \
 \begin{figure}[h!]
 \begin{center}
-\includegraphics{g10} %[trim=0.5cm 5.9cm 0.5cm 20cm]
+
+%\fbox{\includegraphics[
+%    page=1,
+%    width=15cm,
+%    keepaspectratio,
+%    trim=0.5cm 5.9cm 0.5cm 5cm
+%]{ECMThevinModel} }
+
+
+\includegraphics{g10} % [trim=0.5cm 5.9cm 0.5cm 5cm]
 \caption{\label{fig:ECMThevinModel} Equivalent circuit model }
 \end{center} 
 \end{figure} 
@@ -219,7 +198,7 @@ battery test data for example that of a hybrid pulse power characterization (HPP
 
 \end{tabbing}
 
-Other empirical models are the auto regressive exogenous (ARX) model and dual polarisation (DP) model %TODO \cite{26. Xia, B.; Zheng, W.; Zhang, R.; Lao, Z.; Sun, Z. A Novel Observer for Lithium-Ion Battery State of Charge Estimation in Electric Vehicles Based on a Second-Order Equivalent Circuit Model. Energies 2017, 10, 1150. [CrossRef}.
+Other empirical models are the auto regressive exogenous (ARX) model and dual polarisation (DP) model. %TODO \cite{26. Xia, B.; Zheng, W.; Zhang, R.; Lao, Z.; Sun, Z. A Novel Observer for Lithium-Ion Battery State of Charge Estimation in Electric Vehicles Based on a Second-Order Equivalent Circuit Model. Energies 2017, 10, 1150. [CrossRef}.
 
 \subsubsection{Physics based models}
 \label{section:Physics based models}
@@ -269,19 +248,22 @@ Some refinements consists of improvements or adaptions to libre.solar use case a
 
 
 %TODO make a table out of this list or some other structure with label which can be referenced
-Changelog: 
+Changelog\footnote{note exact changes are traceable with the commits to the fork. 
+}: 
+\begin{itemize}
+\item adoption of libre solar code style guide 
+\item adoption of TinyEKF notation  \footnote{\url{https://github.com/simondlevy/TinyEKF/}} 
+\item change from energy counting to coulomb counting
+\item use of float instead of integer in order to guarantee correct calculations, with no overflow. 
+\end{itemize}
 
--adoption of libre solar code style guide 
--adoption of TinyEKF notation  \footnote{\url{https://github.com/simondlevy/TinyEKF/}} \\
--change from energy counting to coulomb counting
--use of float instead of integer in order to guarantee correct calculations, with no overflow. 
-note exact changes are traceable with the commits to the fork. \\
 \
 \
 \
 
+\pagebreak
 
-\subsection{Definition of EFK equations}
+\subsection{Definition of EKF equations}
 \label{System's dynamic model}
 
 
@@ -292,20 +274,20 @@ note exact changes are traceable with the commits to the fork. \\
 %\emph{f} ->  predicted state from the previous estimate  \\
 %\emph{h} ->  compute the predicted measurement from the predicted state \\
 
-
 The EKF consist of two equations describing the system the SoC is to be predicted for:
 \begin{equation}
-  {\boldsymbol {x}}_{k+1}=f({\boldsymbol {x}}_{k},{{i}}_{k})+ {\boldsymbol {w}}_{k}  \ (state\ space\ equation aka observation model aka state transition ?)  
+  {\boldsymbol {x}}_{k+1}=f({\boldsymbol {x}}_{k},{{i}}_{k})+ {\boldsymbol {w}}_{k}  \ (state\ space\ equation)  % aka observation model aka state transition
 \end{equation}
 \begin{equation}
- y_{k}=h({\boldsymbol  {x}}_{{k}}, {i}_{k})+{\boldsymbol  {v}}_{{k}}  \ \ \ \ \ \ \ \ \ \ \  \ (control\ output\ equation aka control-input model)  \\
+ y_{k}=h({\boldsymbol  {x}}_{{k}}, {i}_{k})+{\boldsymbol  {v}}_{{k}}  \ \ \  (control\ output\ equation ) % aka control-input model
 \end{equation}
 where: 
 \begin{tabbing}
-\phantom{$v(t)  \  \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ $}\= \kill
-$\boldsymbol x_{k}$\> = $[SoC, R_0, v_1]$ \\ 
-$f({\boldsymbol {x}}_{k}, {i}_{k},)$\> =  \ $ {x}_{k}[0] - \frac{\Delta t}{Q_{C}} i_{k} $ \ \ \ \ (discrete coulomb counting equation \ref{equations:CoulombCounting} ) \\
-$h(\boldsymbol x,i_k) = OCV(SoC) + i_k R_0  +  v_1$ (discrete ECM equation \ref{equation:ECM})\\
+\phantom{$v(t)  \  \ \ \  \ $}\= \kill
+
+$f({\boldsymbol {x}}_{k}, {i}_{k},) = {x}_{k}[0] - \frac{\Delta t}{Q_{C}} i_{k} $ \ \ \ \ (discrete coulomb counting equation \ref{equations:CoulombCounting} ) \\\\
+$h(\boldsymbol x,i_k) = OCV(SoC) + i_k R_0  +  v_1$ (discrete ECM equation \ref{equation:ECM})\\\\
+$\boldsymbol x_{k} = [SoC, R_0, v_1]$ \\\\
 $y_{k}$\> =  battery terminal voltage,  $v_{k}$ is common  \\
 $i_{k}$\> =   battery current, $u_{k}$ is common  \\
 $w_{k}$\> = noise    \\ 
@@ -351,8 +333,7 @@ This leaves us with the matrices defining the system :
  \frac{\Delta t}{Q_C} \\
  0 \\
  R_1 (1-e^\frac{\Delta t}{R_1 C_1})
- \end{bmatrix}}_{\boldsymbol B_k}  i_k
-  
+ \end{bmatrix}}_{\boldsymbol B_k}  i_k  
 \end{equation}
 
 \begin{equation}
@@ -360,7 +341,6 @@ This leaves us with the matrices defining the system :
 \begin{bmatrix}
  \frac{dOCV}{dSoC} &  i_k  & 1\\
 \end{bmatrix}
-
 \end{equation}
 
 
@@ -368,7 +348,9 @@ This leaves us with the matrices defining the system :
 
 \textbf{Predict} \\
 
-$\hat{\boldsymbol x}_k = f({ \hat{\boldsymbol x}_{k-1}, {i}_{k})$ \\
+$\hat{\boldsymbol x}_k = f( \hat{\boldsymbol x}_{k-1}, {i}_{k})$ \\
+
+
 $\boldsymbol P_k = \boldsymbol F_{k-1} \boldsymbol P_{k-1} \boldsymbol F^T_{k-1} + \boldsymbol Q_{k-1}$ \\
 
 \textbf{Update} \\ 
@@ -385,33 +367,37 @@ $\boldsymbol P_k = (\boldsymbol I - \boldsymbol G_k \boldsymbol H_k) \boldsymbol
 
 
 
-\subsection{Parametrization of the ECM model and other parameters inside the EFK}
+\subsection{Parametrization of the EKF}
 \label{Parametrization}
 
 The parametrization is particularly challenging. It is typically done offline \footnote{not generated by the micro controller unit (MCU) the algorithm is deployed to, thus not on the system running the final algorithm. Offline means on more advanced hardware, which is not available in the final product. See \url{https://en.wikipedia.org/wiki/Online_model} } and requires quite advanced equipment.
 
-No effort has been undertaken to find good parameters, it has been initialized with the idea that the EKF will adjust to bad chosen parameters. The parameters used listed in \ref{equation:Init} are found in literature. %TODO add literature
+No effort has been undertaken to find good parameters, it has been initialized with the idea that the EKF will adjust to bad chosen parameters. The parameters used listed in \ref{equation:Init1} and \ref{equation:Init2} are found in literature. %TODO add literature
 
 \begin{equation}
  \boldsymbol F= 
  \begin{bmatrix}
  1 & 0 & 0\\
  0 & 1 & 0\\
- 0 & 0 & 1}
+ 0 & 0 & 1
  \end{bmatrix} 
  \boldsymbol P= 
  \begin{bmatrix}
  0.1 & 0 & 0\\
  0 & 0.1 & 0\\
- 0 & 0 & 0.1}
+ 0 & 0 & 0.1
  \end{bmatrix}
   \boldsymbol Q= 
   \begin{bmatrix}
   0.0001 & 0 & 0\\
   0 & 0.0001 & 0\\
-  0 & 0 & 0.0001}
-  \end{bmatrix} 
-\boldsymbol x_k = 
+  0 & 0 & 0.0001
+  \end{bmatrix}
+\label{equation:Init1} 
+\end{equation} 
+
+\begin{equation}
+ \boldsymbol x_k = 
 \begin{bmatrix}
 SoC \\
 R_0 \\
@@ -422,9 +408,8 @@ v_1
 0 \\
 0
 \end{bmatrix}  
-
-R = 0.1
-\label{equation:Init}
+\ \ \ \ \ \ R = 0.1
+\label{equation:Init2}
 \end{equation}
 
 
@@ -484,10 +469,18 @@ R = 0.1
 
 \chapter{Experimental Validation}
 
+
+\section{Graphs with Matplotlib or plotly}
+
 2 Arten von Datensätze: 
 
-Vergleich alter Algo neuer Algo, mit Daten von einem Device. X mit Zeit? Vllt schafft man dies im gleiche Schritt wie man die Zeiträume verbessert? Y Achse in 100%. Legende mit Kalman-Soc & libre.solar
-Titel SoC Libre.solar Algo vs Kalman-soc auf Datensatz von Device xy im Zeitraum xx. Kein Titel in der Graphik selber. 
+Vergleich alter Algo neuer Algo, mit Daten von einem Device. 
+
+X mit Zeit? Vllt schafft man dies im gleiche Schritt wie man die Zeiträume verbessert? Y Achse in 100%. Legende mit Kalman-Soc & libre.solar
+
+Titel SoC Libre.solar Algo vs Kalman-soc auf Datensatz von Device xy im Zeitraum xx. 
+Kein Titel in der Graphik selber. 
+
 Mit Matplotlib da ist wsl mehr Hilfe verfügbar? Schnell mal mit Plotly versuchen. 
 
 -Prozent Abweichung dazwischen. Warum ist er besser? Scheint schwer zu diskutieren.
@@ -498,34 +491,6 @@ Mit Matplotlib da ist wsl mehr Hilfe verfügbar? Schnell mal mit Plotly versuche
 
 It is difficult to say that how much the kalman-soc algo is better, but sure is that both are different and that there are many cases where it is sure that libre.solar performs poorly, show examples timeframes.
 
-Discuss results.  (4d)
-
-\section{Graphs with Matplotlib or plotly}
-
-
-\begin{pylabcode}[plotsession]
-rc('text', usetex=True)
-rc('font', **{'family':'serif', 'serif':['Times']})
-rc('font', size=10.0)			
-rc('legend', fontsize=10.0)
-x = linspace(0, 3*pi)
-figure(figsize=(3.25,2))
-plot(x, sin(x), label='$\sin(x)$')
-plot(x, sin(x)**2, label='$\sin^2(x)$',
-linestyle='dashed')
-xlabel(r'$x$-axis')
-ylabel(r'$y$-axis')
-xticks(arange(0, 4*pi, pi), ('$0$',
-'$\pi$', '$2\pi$', '$3\pi$'))
-axis([0, 3*pi, -1, 1])
-legend(loc='lower right')
-savefig('myplot.pdf', bbox_inches='tight')
-\end{pylabcode}
-
-\begin{figure}[!ht]
-\includegraphics{myplot}
-\caption{\label{fig:matplotlib} A plot created with PythonTeX and Matplotlib}
-\end{figure}
 
 \begin{pylabcode}
 import os 
@@ -542,7 +507,7 @@ savefig('matplotoverview.pdf', bbox_inches='tight')
 #Plotly
 pd.options.plotting.backend = "plotly"
 fig = dfProcessedSensorDataEnhanced.plot()
-fig.update_layout(title_text='<b> Overview  </b>', title_x=0.5)
+#fig.update_layout(title_text='<b> Overview  </b>', title_x=0.5)
 fig.show()
 fig.write_image("overview.pdf")
 \end{pylabcode}
@@ -559,7 +524,8 @@ fig.write_image("overview.pdf")
 
 \chapter{Conclusion}
 
-The key to success for a good SoC is a good definition of both models and a good parametrization. The implementation is independent of the use case and depends on the skills of the programmer, in his  hands lies the optimization of the  code. In case no FPU is available on the micro-controller unit (MCU) fix point arithmetic might be an option. 
+The key to success for a good SoC is a good definition of both models and a good parametrization. % The implementation is independent of the use case and depends on the skills of the programmer, in his  hands lies the optimization of the  code.
+In case no FPU is available on the micro-controller unit (MCU) fix point arithmetic might be an option. 
 The Adaptive extend Kalman Filter (AEKF) is an option, where the parameters are determined online, but still AEKF needs to be initialized with parameters not necessary fitting all batteries of a given chemistry, because of different capacities or tolerances and specific designs. 
 TODO It needs to be researched if it only affects the convergence time or if convergence is not reached at all? A further advantage of an adaptive filter is that the state of health (SOH) can be determined along the side. 
 When simple observation and control-input models are used as in the okra kalman-soc algorithm, the parametrization might be much easier?
