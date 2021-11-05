@@ -105,31 +105,31 @@ savefig('OCVlead.pdf', bbox_inches='tight')
 \end{figure}
 
 
-\begin{pylabcode}[plotsession]
-rc('text', usetex=True)
-rc('font', **{'family':'serif', 'serif':['Times']})
-rc('font', size=10.0)			
-rc('legend', fontsize=10.0)
-
-
-#Kalman-Soc original Data embedded in  
-#kalman-soc/src/SoCKalman.cpp , something seems wrong with this data as it goes from 5V to 12.960V  
-xDataLi = [ 0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000, 13000, 14000, 15000, 16000, 17000, 18000, 19000, 20000, 21000, 22000, 23000, 24000, 25000, 26000, 27000, 28000, 29000, 30000, 31000, 32000, 33000, 34000, 35000, 36000, 37000, 38000, 39000, 40000, 41000, 42000, 43000, 44000, 45000, 46000, 47000, 48000, 49000, 50000, 51000, 52000, 53000, 54000, 55000, 56000, 57000, 58000, 59000, 60000, 61000, 62000, 63000, 64000, 65000, 66000, 67000, 68000, 69000, 70000, 71000, 72000, 73000, 74000, 75000, 76000, 77000, 78000, 79000, 80000, 81000, 82000, 83000, 84000, 85000, 86000, 87000, 88000, 89000, 90000, 91000, 92000, 93000, 94000, 95000, 96000, 97000, 98000, 99000, 100000 ]
-yDataLi = [ 5000, 6266, 7434, 8085, 8531, 8867, 9134, 9355, 9543, 9705, 9847, 9974, 10088, 10191, 10285, 10372, 10451, 10525, 10595, 10659, 10720, 10777, 10831, 10882, 10931, 10977, 11021, 11063, 11104, 11142, 11180, 11216, 11251, 11284, 11317, 11349, 11379, 11409, 11438, 11467, 11495, 11522, 11548, 11574, 11600, 11625, 11650, 11675, 11699, 11723, 11746, 11769, 11793, 11815, 11838, 11861, 11883, 11906, 11928, 11950, 11972, 11994, 12017, 12039, 12061, 12083, 12105, 12127, 12150, 12172, 12195, 12217, 12240, 12263, 12286, 12309, 12333, 12356, 12380, 12404, 12428, 12452, 12477, 12501, 12526, 12552, 12577, 12603, 12629, 12655, 12682, 12708, 12735, 12763, 12790, 12818, 12846, 12875, 12903, 12931, 12960 ]
-xLi = []
-yLi = []
-for OCV in xDataLi:
-    xLi.append(OCV / 1000)
-for SoC in yDataLi:
-    yLi.append(SoC / 1000)
-    
- 
-figure(figsize=(3.25,2))
-plot(xLi,yLi)
-xlabel(r'SoC(\%)')
-ylabel(r'OCV(V)')
-savefig('OCVLion.pdf', bbox_inches='tight')
-\end{pylabcode}
+%\begin{pylabcode}[plotsession]
+%rc('text', usetex=True)
+%rc('font', **{'family':'serif', 'serif':['Times']})
+%rc('font', size=10.0)			
+%rc('legend', fontsize=10.0)
+%
+%
+%#Kalman-Soc original Data embedded in  
+%#kalman-soc/src/SoCKalman.cpp , something seems wrong with this data as it goes from 5V to 12.960V  
+%xDataLi = [ 0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000, 13000, 14000, 15000, 16000, 17000, 18000, 19000, 20000, 21000, 22000, 23000, 24000, 25000, 26000, 27000, 28000, 29000, 30000, 31000, 32000, 33000, 34000, 35000, 36000, 37000, 38000, 39000, 40000, 41000, 42000, 43000, 44000, 45000, 46000, 47000, 48000, 49000, 50000, 51000, 52000, 53000, 54000, 55000, 56000, 57000, 58000, 59000, 60000, 61000, 62000, 63000, 64000, 65000, 66000, 67000, 68000, 69000, 70000, 71000, 72000, 73000, 74000, 75000, 76000, 77000, 78000, 79000, 80000, 81000, 82000, 83000, 84000, 85000, 86000, 87000, 88000, 89000, 90000, 91000, 92000, 93000, 94000, 95000, 96000, 97000, 98000, 99000, 100000 ]
+%yDataLi = [ 5000, 6266, 7434, 8085, 8531, 8867, 9134, 9355, 9543, 9705, 9847, 9974, 10088, 10191, 10285, 10372, 10451, 10525, 10595, 10659, 10720, 10777, 10831, 10882, 10931, 10977, 11021, 11063, 11104, 11142, 11180, 11216, 11251, 11284, 11317, 11349, 11379, 11409, 11438, 11467, 11495, 11522, 11548, 11574, 11600, 11625, 11650, 11675, 11699, 11723, 11746, 11769, 11793, 11815, 11838, 11861, 11883, 11906, 11928, 11950, 11972, 11994, 12017, 12039, 12061, 12083, 12105, 12127, 12150, 12172, 12195, 12217, 12240, 12263, 12286, 12309, 12333, 12356, 12380, 12404, 12428, 12452, 12477, 12501, 12526, 12552, 12577, 12603, 12629, 12655, 12682, 12708, 12735, 12763, 12790, 12818, 12846, 12875, 12903, 12931, 12960 ]
+%xLi = []
+%yLi = []
+%for OCV in xDataLi:
+%    xLi.append(OCV / 1000)
+%for SoC in yDataLi:
+%    yLi.append(SoC / 1000)
+%    
+% 
+%figure(figsize=(3.25,2))
+%plot(xLi,yLi)
+%xlabel(r'SoC(\%)')
+%ylabel(r'OCV(V)')
+%savefig('OCVLion.pdf', bbox_inches='tight')
+%\end{pylabcode}
 
 %\begin{figure}[!ht]
 %\centering
@@ -286,7 +286,8 @@ where:
 \phantom{$v(t)  \  \ \ \  \ $}\= \kill
 
 $f({\boldsymbol {x}}_{k}, {i}_{k},) = {x}_{k}[0] - \frac{\Delta t}{Q_{C}} i_{k} $ \ \ \ \ (discrete coulomb counting equation \ref{equations:CoulombCounting} ) \\\\
-$h(\boldsymbol x,i_k) = OCV(SoC) + i_k R_0  +  v_1$ (discrete ECM equation \ref{equation:ECM})\\\\
+$h(\boldsymbol x,i_X mit Zeit? Vllt schafft man dies im gleiche Schritt wie man die Zeiträume verbessert? Y Achse in 100%. Legende mit Kalman-Soc & libre.solar
+k) = OCV(SoC) + i_k R_0  +  v_1$ (discrete ECM equation \ref{equation:ECM})\\\\
 $\boldsymbol x_{k} = [SoC, R_0, v_1]$ \\\\
 $y_{k}$\> =  battery terminal voltage,  $v_{k}$ is common  \\
 $i_{k}$\> =   battery current, $u_{k}$ is common  \\
@@ -476,13 +477,6 @@ v_1
 
 Vergleich alter Algo neuer Algo, mit Daten von einem Device. 
 
-X mit Zeit? Vllt schafft man dies im gleiche Schritt wie man die Zeiträume verbessert? Y Achse in 100%. Legende mit Kalman-Soc & libre.solar
-
-Titel SoC Libre.solar Algo vs Kalman-soc auf Datensatz von Device xy im Zeitraum xx. 
-Kein Titel in der Graphik selber. 
-
-Mit Matplotlib da ist wsl mehr Hilfe verfügbar? Schnell mal mit Plotly versuchen. 
-
 -Prozent Abweichung dazwischen. Warum ist er besser? Scheint schwer zu diskutieren.
 
 -Meine Daten? 
@@ -493,6 +487,7 @@ It is difficult to say that how much the kalman-soc algo is better, but sure is 
 
 
 \begin{pylabcode}
+#https://queirozf.com/entries/matplotlib-pylab-pyplot-etc-what-s-the-different-between-these
 import os 
 import pandas as pd
 currentWorkingDir =  os.getcwd()
@@ -502,7 +497,7 @@ dfProcessedSensorDataEnhanced = pd.read_csv(outputDataDir + 'EVLKpN_20210817-202
 #Matplotlib
 dfProcessedSensorDataEnhanced.plot()
 plt.show()
-savefig('matplotoverview.pdf', bbox_inches='tight')
+savefig('matplotoverview.pdf')
 
 #Plotly
 pd.options.plotting.backend = "plotly"
@@ -512,15 +507,47 @@ fig.show()
 fig.write_image("overview.pdf")
 \end{pylabcode}
 	
-\begin{figure}[!ht]
-\includegraphics{overview}
-\caption{\label{fig:overview} Overview of data}
+
+%\begin{pylabcode}[plotsession]
+%import os 
+%import pandas as pd
+%currentWorkingDir =  os.getcwd()
+%outputDataDir = currentWorkingDir + '/dep/kalman-soc/data/'
+%dfProcessedSensorDataEnhanced = pd.read_csv(outputDataDir + 'EVLKpN_20210817-20210830_enhanced_processed_sensor_data.zip')  
+%
+%x = dfProcessedSensorDataEnhanced.index
+%yEKF = dfProcessedSensorDataEnhanced.kalman_soc
+%ySoCLS = dfProcessedSensorDataEnhanced.SoC_LibreSolar
+%# rc('text', usetex=True)
+%# rc('font', **{'family':'serif', 'serif':['Times']})
+%# rc('font', size=10.0)			
+%# rc('legend', fontsize=10.0)
+%#x = linspace(0, 3*pi)
+%figure(figsize=(3.25,2))
+%plot(x,yEKF,label='kalman_soc') 
+%plot(x,ySoCLS,label='SoC_LibreSolar',linestyle='dashed')
+%xlabel(r'time (min)')
+%ylabel(r'SoC (\%)')
+%#xticks(arange(0, 4*pi, pi), ('$0$',
+%#'$\pi$', '$2\pi$', '$3\pi$'))
+%#axis([0, 3*pi, -1, 1])
+%legend(loc='lower right')
+%savefig('librevskalman.pdf', bbox_inches='tight')
+%\end{pylabcode}
+%
+
+\begin{figure}
+\centering	
+\includegraphics{librevskalman}
+\caption{\label{fig:librevskalman} SoC libre.solar algorithm vs kalman-soc on device EVLKpN from 2021/08/17 to 2021/08/30 }
 \end{figure}
 
-\begin{figure}[!ht]
-\includegraphics{matplotoverview}
-\caption{\label{fig:overview} Overview of data}
+\begin{figure}
+\centering	
+\includegraphics[width=16cm]{figure_1.png}
+\caption{\label{fig:librevskalmanall} SoC libre.solar algorithm vs kalman-soc on device EVLKpN from 2021/08/17 to 2021/08/30 }
 \end{figure}
+
 
 \chapter{Conclusion}
 
