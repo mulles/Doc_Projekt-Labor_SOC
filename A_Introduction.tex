@@ -17,7 +17,8 @@ The scope of the project is to produce an algorithm for the solar charge control
 
 %TODO put a schematic of photo of the setup here, could be the design of the controller as well.
 
-A key principle followed throughout the project is to use, wherever possible, Free Open-source Hardware (FOSH) and Free Open-source Software (FOSS). Consequently, the whole project has beenreleased as source code with a license adhering to these principles \cite{Schons_Development_and_validation_2021} is available at \footnote{ \url{https://github.com/mulles/Doc_Projekt-Labor_SOC} }. As the SoC can only be measured indirectly, it has to be deduced from available measurements.  %TODO at citations here that prove this
+A key principle followed throughout the project is to use, wherever possible, Free Open-source Hardware (FOSH) and Free Open-source Software (FOSS). Consequently, the whole project has been
+released as source code with a license adhering to these principles \cite{Schons_Development_and_validation_2021} is available at \footnote{ \url{https://github.com/mulles/Doc_Projekt-Labor_SOC} }. As the SoC can only be measured indirectly, it has to be deduced from available measurements.  %TODO at citations here that prove this
 The charge controller exposes battery current and voltage measurements once a second for this purpose. \\%TODO make a table out of this list or some other structure with label which can be referenced in implementations
 There are three main approaches for estimating the SoC: model-based, data-driven, coulomb-counting w/ Open circuit voltage (OCV) \cite{espedal2021current}. Best results seems to be achieved with combining the approaches to profit from their different strengths.
 
@@ -211,7 +212,8 @@ empirical models, making it non suitable for the mppt-1210-hus micro-controller 
 \subsubsection{Data-driven}
 \label{section:Data-driven}
 
-These approaches are based on artificial
+These approaches are based on artificial
+
 intelligence (AI) and need good training data and the right training parameters. Combined with PBM's it is a very promising research field \cite{9477587}, which first successes to reduce the computational complexity so online estimation of SoC on MCU is	 possible.
 
 
@@ -242,21 +244,28 @@ As the  ECM's equation \ref{equation:ECM}  is non-linear an extended kalman filt
 
 A reasonable step by step guide to implement the EKF is \cite{rzepka2021implementing}. The algorithm refined in this project is based on a fork of the algorithm named $kalman-soc$\footnote{ \url{https://github.com/mulles/kalman-soc}} designed by Matthew Johnston for the company okra-solar. 
 
-Some refinements consists of improvements or adaptions to libre.solar use case and code base. \\
-
+The refinements consists of improvements or adaptions to libre.solar use case and code base.
+\\
+
+
 %TODO verify if this it completely wrong: -Works without the input of a Equivalent Circuit Model (ECM) specific to the physical battery, which would need to be parameterized doing advanced measurements during charging and discharging of the battery. 
 
 
 %TODO make a table out of this list or some other structure with label which can be referenced
 Changelog\footnote{note exact changes are traceable with the commits to the fork. 
-}: 
+}: 
+
 \begin{itemize}
-\item adoption of libre solar code style guide 
+\item adoption of libre solar code style guide 
+
 \item adoption of TinyEKF notation  \footnote{\url{https://github.com/simondlevy/TinyEKF/}} 
-\item change from energy counting to coulomb counting
-\item use of float instead of integer in order to guarantee correct calculations, with no overflow. 
+\item change from energy counting to coulomb counting
+
+\item use of float instead of integer in order to guarantee correct calculations, with no overflow. 
+
 \end{itemize}
-
+
+
 \
 \
 \
@@ -286,8 +295,7 @@ where:
 \phantom{$v(t)  \  \ \ \  \ $}\= \kill
 
 $f({\boldsymbol {x}}_{k}, {i}_{k},) = {x}_{k}[0] - \frac{\Delta t}{Q_{C}} i_{k} $ \ \ \ \ (discrete coulomb counting equation \ref{equations:CoulombCounting} ) \\\\
-$h(\boldsymbol x,i_X mit Zeit? Vllt schafft man dies im gleiche Schritt wie man die Zeiträume verbessert? Y Achse in 100%. Legende mit Kalman-Soc & libre.solar
-k) = OCV(SoC) + i_k R_0  +  v_1$ (discrete ECM equation \ref{equation:ECM})\\\\
+$h(\boldsymbol x,i_k) = OCV(SoC) + i_k R_0  +  v_1$ (discrete ECM equation \ref{equation:ECM})\\\\
 $\boldsymbol x_{k} = [SoC, R_0, v_1]$ \\\\
 $y_{k}$\> =  battery terminal voltage,  $v_{k}$ is common  \\
 $i_{k}$\> =   battery current, $u_{k}$ is common  \\
@@ -344,8 +352,12 @@ This leaves us with the matrices defining the system :
 \end{bmatrix}
 \end{equation}
 
-
 \subsubsection{EFK Steps}
+
+It is common to separate the EKF algorithm into two steps. In the prediction step the next SoC is predicted using coulomb counting method (current measurement) with function $f$ and the %TODO name of matrix 
+matrix $\boldsymbol P$ is calculated. In the update step the %TODO zu erwartender 
+measurement is updated based on the predicted SoC. Then the gain matrix $G$ is calculated, which is used to adjust the SoC and other states depended on if the voltage measurement is trusted more than the current measurement and vice-versa. Wikipedia %TODO improve\footnote{\url{wikipedia.de/kalman}}
+offers a comprehensive explanations of the different equations \\
 
 \textbf{Predict} \\
 
@@ -470,42 +482,72 @@ v_1
 
 \chapter{Experimental Validation}
 
-
-\section{Graphs with Matplotlib or plotly}
-
-2 Arten von Datensätze: 
-
-Vergleich alter Algo neuer Algo, mit Daten von einem Device. 
-
--Prozent Abweichung dazwischen. Warum ist er besser? Scheint schwer zu diskutieren.
-
--Meine Daten? 
-
--Neue Daten generieren? Der Prozess ist ja eigentlich recht automatisiert. 
-
-It is difficult to say that how much the kalman-soc algo is better, but sure is that both are different and that there are many cases where it is sure that libre.solar performs poorly, show examples timeframes.
+%It is difficult to say how much the kalman-soc algo is better, but sure is that both are different and that there are many cases where it is sure that libre.solar performs poorly, show examples timeframes.
+% Why is kalman Soc better? 
+%TODO Neue Daten generieren mit HPPC test ? Der Prozess ist ja eigentlich recht automatisiert.
 
 
-\begin{pylabcode}
-#https://queirozf.com/entries/matplotlib-pylab-pyplot-etc-what-s-the-different-between-these
-import os 
-import pandas as pd
-currentWorkingDir =  os.getcwd()
-outputDataDir = currentWorkingDir + '/dep/kalman-soc/data/'
-dfProcessedSensorDataEnhanced = pd.read_csv(outputDataDir + 'EVLKpN_20210817-20210830_enhanced_processed_sensor_data.zip')  
 
-#Matplotlib
-dfProcessedSensorDataEnhanced.plot()
-plt.show()
-savefig('matplotoverview.pdf')
+The developed kalman-soc algorithm \ref{chap:Implementation} has been feed with two different datasets and compared to the current libre.solar SoC algorithm \ref{code:libreSolarSoC}. The first dataset  has been generated with a charge controller named mppt-hus-1210 by a laboratory measurement setup as in figure \ref   The second dataset has been generated by libre.solar with a charge controller (EVLKpN) being deployed in the field in Africa.
 
-#Plotly
-pd.options.plotting.backend = "plotly"
-fig = dfProcessedSensorDataEnhanced.plot()
-#fig.update_layout(title_text='<b> Overview  </b>', title_x=0.5)
-fig.show()
-fig.write_image("overview.pdf")
-\end{pylabcode}
+\section{Dataset from mppt-hus-1210 laboratory measurement setup}
+
+As visualized in figure \ref{fig:librevskalman-mppt-1210-hus-all} the dataset consists of charging the battery completely, discharging it for 20min with 1A, fully charging again, discharging 10min with 1A and 40min with 3A, finally fully charging again. The length of the dataset is 220min. 
+
+\begin{figure}
+\centering	
+\includegraphics[width=16cm]{mppt-1210-hus-2021-05-28T20:10:00.000Z-2021-05-29T02:19:00.000Z-librevskalman-all.pdf}
+\caption{\label{fig:librevskalman-mppt-1210-hus-all} SoC libre.solar algorithm vs kalman-soc on laboratory device mppt-1210-hus}
+\end{figure}
+
+In figure \ref{fig:librevskalman-mppt-hus} one can see that both algorithm have huge deviations, which might be due to a wrong capacity set in the charge controller. Still the kalman-soc algorithm follows well what one would expect by analyzing the charge state as well as the current and voltage. 
+
+\begin{figure}
+\centering	
+\includegraphics{mppt-1210-hus-2021-05-28T20:10:00.000Z-2021-05-29T02:19:00.000Z-librevskalman.pdf}
+\caption{\label{fig:librevskalman-mppt-hus} SoC libre.solar algorithm vs kalman-soc on device mppt-1210-hus}
+\end{figure}
+
+\section{Dataset from EVLKpN of field test} 
+
+The dataset introduced in figure \ref{fig:librevskalman-mppt-1210-hus-all} was produced by real world usage during 13 days in a household in Africa. 
+
+\begin{figure}
+\centering	
+\includegraphics[width=16cm]{EVLKpN_20210817-20210830-librevskalman-all.pdf}
+\caption{\label{fig:librevskalman-EVLKpN-all} SoC libre.solar algorithm vs kalman-soc on device EVLKpN in the field from from 2021/08/17 to 2021/08/30 }
+\end{figure}
+
+
+\begin{figure}
+\centering	
+\includegraphics{EVLKpN_20210817-20210830-librevskalman.pdf}
+\caption{\label{fig:librevskalman-EVLKpN} SoC libre.solar algorithm vs kalman-soc on device EVLKpN in the field from 2021/08/17 to 2021/08/30 }
+\end{figure}
+
+
+
+%\begin{pylabcode}
+%#https://queirozf.com/entries/matplotlib-pylab-pyplot-etc-what-s-the-different-between-these
+%#https://github.com/matplotlib/matplotlib/issues/10272hj
+%import os 
+%import pandas as pd
+%currentWorkingDir =  os.getcwd()
+%outputDataDir = currentWorkingDir + '/dep/kalman-soc/data/'
+%dfProcessedSensorDataEnhanced = pd.read_csv(outputDataDir + 'EVLKpN_20210817-20210830_enhanced_processed_sensor_data.zip')  
+%
+%#Matplotlib
+%dfProcessedSensorDataEnhanced.plot()
+%plt.show()
+%savefig('matplotoverview.pdf')
+%
+%#Plotly
+%pd.options.plotting.backend = "plotly"
+%fig = dfProcessedSensorDataEnhanced.plot()
+%#fig.update_layout(title_text='<b> Overview  </b>', title_x=0.5)
+%fig.show()
+%fig.write_image("overview.pdf")
+%\end{pylabcode}
 	
 
 %\begin{pylabcode}[plotsession]
@@ -536,18 +578,6 @@ fig.write_image("overview.pdf")
 %\end{pylabcode}
 %
 
-\begin{figure}
-\centering	
-\includegraphics{librevskalman}
-\caption{\label{fig:librevskalman} SoC libre.solar algorithm vs kalman-soc on device EVLKpN from 2021/08/17 to 2021/08/30 }
-\end{figure}
-
-\begin{figure}
-\centering	
-\includegraphics[width=16cm]{figure_1.png}
-\caption{\label{fig:librevskalmanall} SoC libre.solar algorithm vs kalman-soc on device EVLKpN from 2021/08/17 to 2021/08/30 }
-\end{figure}
-
 
 \chapter{Conclusion}
 
@@ -561,7 +591,8 @@ TODO to check if the initial parameters, in this case OCV in function of SoC dat
 \textbf{Citations concerning the on/off-line parametrization} \\
 
 "A sigma-point Kalman filter is further used to manage inaccuracies generated by the reduction process and experimental-related issues such as measurement error (noise) in the current and voltage sensors."
-
+
+
 Offline parametrization: \\
 'As a result, many experimental pretests investigating the
 effects of the internal and external conditions of a battery on its parameters are required, since the
