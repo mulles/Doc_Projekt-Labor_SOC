@@ -13,21 +13,19 @@
 \chapter{Introduction}
 \label{chap:Introduction}
 
-The scope of the project is to produce an algorithm for the solar charge controller (mppt-1210-hus) \footnote{\url{https://github.com/LibreSolar/mppt-1210-hus}} produced by libre.solar, which outputs the state of charge (SoC) of the lead acid battery attached to it.
-
-%TODO put a schematic of photo of the setup here, could be the design of the controller as well.
+The scope of the project is to produce an algorithm for the solar charge controller \href{https://github.com/LibreSolar/mppt-1210-hus}{(mppt-1210-hus)} produced by libre.solar, which outputs the state of charge (SoC) of the lead acid battery attached to it as seen in schematic \ref{fig:SoCSetup}.
 
 A key principle followed throughout the project is to use, wherever possible, Free Open-source Hardware (FOSH) and Free Open-source Software (FOSS). Consequently, the whole project has been
-released as source code with a license adhering to these principles \cite{Schons_Development_and_validation_2021} is available at \footnote{ \url{https://github.com/mulles/Doc_Projekt-Labor_SOC} }. As the SoC can only be measured indirectly, it has to be deduced from available measurements.  %TODO at citations here that prove this
+released as source code  \cite{Schons_Development_and_validation_2021} with a license adhering to these principles and is available \href{https://github.com/mulles/Doc_Projekt-Labor_SOC}{here}. As the SoC can only be measured indirectly, it has to be deduced from available measurements.  %TODO at citations here that prove this
 The charge controller exposes battery current and voltage measurements once a second for this purpose. \\%TODO make a table out of this list or some other structure with label which can be referenced in implementations
-There are three main approaches for estimating the SoC: model-based, data-driven, coulomb-counting w/ Open circuit voltage (OCV) \cite{espedal2021current}. Best results seems to be achieved with combining the approaches to profit from their different strengths.
+There are three main approaches for estimating the SoC: coulomb-counting w/ Open circuit voltage (OCV), model-based, data-driven \cite{espedal2021current}. Best results seem to be achieved by combining the approaches to profit from their different strengths.
 
 %\section{Background}
 
-\subsubsection{Current integration method - Coulomb Counting /w OCV }
+\subsubsection{Current integration method - Coulomb Counting /w OCV}
 \label{section:CoulombCounting}
 
-Seems the most simple way to define SoC:
+Equation \ref{equations:CoulombCounting} shows a simple way to define the SoC:
 
 \begin{equation}
 z(t) = z(0) - \frac{1}{{Q_{C}}}\int_{0}^{\Delta t} {i(t)\ dt}
@@ -44,11 +42,16 @@ $\Delta t$\> = the time interval between two current measurements
 
 The initial SoC $z(0)$ is determined by consulting a OCV-SoC lookup table. Starting from there the charge in relation to total capacity entering and leaving the battery is subtracted from SoC. This method has several disadvantages: \\
 %TODO make a table out of this list or some other structure with label which can be referenced
--The initial SoC incorporates already an error, which won't be corrected till recalibration \\
--Error in counting charges and measurement errors accumulate quickly\\
--The algorithms only recalibrate reliably on full charge, which especially in solar systems does not occur regularly, producing awful SoC till recalibration. \\ %TODO at citations here that prove this
 
-The coulomb counting method is most often combined with ongoing voltage measurements, while battery is at rest, known as OCV and a resulting OCV-SoC-lookup as shown in figure \ref{fig:OCVLead}. This mitigates the recalibration problem in case the battery gets some rests, but this enhancement still does not take hysteresis into account, which make OCV-SoC-lookup even with voltages at rest unreliable \cite{6861809} \cite{khan2016hysteresis}. %OCV-SoC curve is very flat for mid range SoC for LiPo.
+\begin{itemize}
+\item The initial SoC incorporates already an error, which won't be corrected till recalibration \\
+\item Error in counting charges and measurement errors accumulate quickly\\
+\item The algorithms only recalibrate reliably on full charge, which especially in solar systems does not occur regularly, producing incorrect SoC until recalibration. \\ %TODO at citations here that prove this
+\end{itemize}
+The coulomb counting method is most often combined with ongoing voltage measurements, while the battery is at rest (OCV) and a resulting OCV-SoC-lookup as shown in figure \ref{fig:OCVLead}. This mitigates the recalibration problem in case the battery gets some rests, but this enhancement still does not take hysteresis into account, which make OCV-SoC-lookup even with voltages at rest unreliable \cite{6861809} \cite{khan2016hysteresis}. %OCV-SoC curve is very flat for mid range SoC for LiPo. 
+\\
+\\
+The existing SoC function \href{https://github.com/LibreSolar/charge-controller-firmware/blob/5196694e42c38eee18ab25e65bd51ec578eba101/src/bat_charger.cpp\#L325}{$Charger::update\_soc$}\ref{code:libreSolarSoC}  embebbed in mppt-1210-hus uses OCV-SoC-lookup function based on linear interpolation of $ocv\_empty$ and $ocv\_full$.
 
 
 %\hyperlink{datasheetBattery}{Datasheet Lead acid battery}
@@ -101,7 +104,7 @@ savefig('OCVlead.pdf', bbox_inches='tight')
 
 \begin{figure}
 \centering
-\includegraphics{OCVlead}
+\includegraphics[height=8cm]{OCVlead}
 \caption{\label{fig:OCVLead} OCV-SoC lead acid battery }
 \end{figure}
 
@@ -139,26 +142,14 @@ savefig('OCVlead.pdf', bbox_inches='tight')
 %\end{figure}
 
 
-\pagebreak
-
-The existing SoC function $Charger::update\_soc$  \footnote{\url{https://github.com/LibreSolar/charge-controller-firmware/blob/5196694e42c38eee18ab25e65bd51ec578eba101/src/bat_charger.cpp\#L325}} \ref{code:libreSolarSoC} embebbed in mppt-1210-hus uses OCV-SoC-lookup function based on linear interpolation of 
-$ocv\_empty$ and $ocv\_full$:
-
-%TODO reference code appendix
-
-
+%\begin{figure}
+%\centering
+%\includegraphics[width=15cm]{StateMaschineMartinLibreSolar3-s2.0-B9780444595133000157-f15-06ab-9780444595133.jpg}
+%\caption{\label{fig:StateMaschineMartinLibreSolar3} State maschine libre.solar}
+%\end{figure}
+%%TODO Remove \ref{fig:StateMaschineMartinLibreSolar3}  and produce one that fits Libre.solar Algo maybe cite \url{https://www.sciencedirect.com/topics/engineering/coulomb-counting}  but it does not seems to be a good reference. 
 
 
-\begin{figure}
-\centering
-\includegraphics[width=15cm]{StateMaschineMartinLibreSolar3-s2.0-B9780444595133000157-f15-06ab-9780444595133.jpg}
-\caption{\label{fig:StateMaschineMartinLibreSolar3} State maschine libre.solar}
-\end{figure}
-TODO Remove \ref{fig:StateMaschineMartinLibreSolar3}  and produce one that fits Libre.solar Algo maybe cite \url{https://www.sciencedirect.com/topics/engineering/coulomb-counting}  but it does not seems to be a good reference. 
-
-
-
-\pagebreak
 
 \subsubsection{Equivalent circuit based models}
 \label{section:Equivalentcircuitbasedmodels}
@@ -204,8 +195,8 @@ Other empirical models are the auto regressive exogenous (ARX) model and dual po
 \subsubsection{Physics based models}
 \label{section:Physics based models}
 
-As Gregory Plettv puts it in his lectures notes of course ECE5720  \footnote{ \url{http://mocha-java.uccs.edu/ECE5720/ECE5720-Notes02.pdf}} :  "Battery management and controls using physics-based models is a major focus of our present research efforts and (I hope) of a future
-course" in 2015. The first papers on the topic are available now \cite{9477587}, but physics based models (PBM) still are hard to implement and not much material or software code is available. Thus, the ECM model is preferred for now. Moreover, the PBM based models have a higher computational complexity than
+As the professor Dr. Gregory L. Plett puts it in his lectures notes of course ECE5720  \footnote{ \url{http://mocha-java.uccs.edu/ECE5720/ECE5720-Notes02.pdf}} :  "Battery management and controls using physics-based models is a major focus of our present research efforts and (I hope) of a future
+course" in 2015. The first papers on the topic are available now \cite{9477587}, but physics based models (PBM) still are hard to implement and only little material or software code is available. Thus, the ECM model is preferred for now. Moreover, the PBM based models have a higher computational complexity than
 empirical models, making it non suitable for the mppt-1210-hus micro-controller unit (MCU) being a 32bit ARM STM32L072. %TODO find another citation of gregory plett concerning PBM's
 
 
@@ -214,18 +205,8 @@ empirical models, making it non suitable for the mppt-1210-hus micro-controller 
 
 These approaches are based on artificial
 
-intelligence (AI) and need good training data and the right training parameters. Combined with PBM's it is a very promising research field \cite{9477587}, which first successes to reduce the computational complexity so online estimation of SoC on MCU is	 possible.
-
-
-%\chapter{Hardware Setup for validation}
-
-%\begin{figure}[!ht]
-%\includegraphics{SOC_Setup.png}
-%\caption{\label{fig:SoCSetup} Setup to verify SoC Algorithm}
-%\end{figure}
-
+intelligence (AI) and need good training data and the right training parameters. Combined with PBM it is a very promising research field \cite{9477587}. First successes have been presented, which reduce the computational complexity so online estimation of SoC on MCU becomes possible.
 %TODO this might just be ignored for now, as it would double the size of this document. It could be used so the user gets an idea of how the system looks like. Maybe a more simple schematic or photo incorpated in the introduction \ref{chap:Introduction}  would make more sense. The setup might not even have been used to produce data for this project, more to learn about the system the algo has been developed for.
-
 \chapter{Implementation}
 \label{chap:Implementation}
 
@@ -270,7 +251,7 @@ Changelog\footnote{note exact changes are traceable with the commits to the fork
 \
 \
 
-\pagebreak
+%\pagebreak
 
 \subsection{Definition of EKF equations}
 \label{System's dynamic model}
@@ -485,46 +466,61 @@ v_1
 %It is difficult to say how much the kalman-soc algo is better, but sure is that both are different and that there are many cases where it is sure that libre.solar performs poorly, show examples timeframes.
 % Why is kalman Soc better? 
 %TODO Neue Daten generieren mit HPPC test ? Der Prozess ist ja eigentlich recht automatisiert.
+The developed kalman-soc algorithm \ref{chap:Implementation} has been feed with two different datasets and compared to the current libre.solar SoC algorithm \ref{code:libreSolarSoC}. The first dataset  has been generated with a charge controller named mppt-hus-1210 by a laboratory measurement setup as in figure \ref{fig:SoCSetup}. The second dataset has been generated by libre.solar by the same charge controller named EVLKpN being deployed in the field in Africa.
 
+%\chapter{Hardware Setup for validation}
 
+\begin{figure}[h!]
+\centering
+\includegraphics[width=16cm]{SOC_Setup.pdf}
+\caption{\label{fig:SoCSetup} Setup to validate the SoC algorithm}
+\end{figure}
 
-The developed kalman-soc algorithm \ref{chap:Implementation} has been feed with two different datasets and compared to the current libre.solar SoC algorithm \ref{code:libreSolarSoC}. The first dataset  has been generated with a charge controller named mppt-hus-1210 by a laboratory measurement setup as in figure \ref   The second dataset has been generated by libre.solar with a charge controller (EVLKpN) being deployed in the field in Africa.
+\pagebreak
 
 \section{Dataset from mppt-hus-1210 laboratory measurement setup}
 
-As visualized in figure \ref{fig:librevskalman-mppt-1210-hus-all} the dataset consists of charging the battery completely, discharging it for 20min with 1A, fully charging again, discharging 10min with 1A and 40min with 3A, finally fully charging again. The length of the dataset is 220min. 
+As visualized in figure \ref{fig:librevskalman-mppt-1210-hus-all} the dataset consists of charging the battery completely, discharging it for 20min with 1A, fully charging again, discharging 10min with 1A and 40min with 3A, finally fully charging again. The length of the dataset is 220min. The same graph can be seen more interactively \href{https://raw.githack.com/mulles/kalman-soc/main/data/mppt-1210-hus_2021-05-28T20:10:00.000Z-2021-05-29T02:19:00.000Z_SOC_Graph.html}{here} 
 
-\begin{figure}
+\begin{figure}[h!]
 \centering	
-\includegraphics[width=16cm]{mppt-1210-hus-2021-05-28T20:10:00.000Z-2021-05-29T02:19:00.000Z-librevskalman-all.pdf}
-\caption{\label{fig:librevskalman-mppt-1210-hus-all} SoC libre.solar algorithm vs kalman-soc on laboratory device mppt-1210-hus}
+\includegraphics[width=16cm,height=10cm]{mppt-1210-hus-2021-05-28T20:10:00.000Z-2021-05-29T02:19:00.000Z-librevskalman-all.pdf}
+\caption{\label{fig:librevskalman-mppt-1210-hus-all} All measurements with laboratory device mppt-1210-hus}
 \end{figure}
 
-In figure \ref{fig:librevskalman-mppt-hus} one can see that both algorithm have huge deviations, which might be due to a wrong capacity set in the charge controller. Still the kalman-soc algorithm follows well what one would expect by analyzing the charge state as well as the current and voltage. 
+\pagebreak 
 
-\begin{figure}
+In figure \ref{fig:librevskalman-mppt-hus} one can see that both algorithm have huge deviations, which could be explained by a probably wrongly set capacity in the charge controller. So comparison does not much sense. One can see that the kalman-soc algorithm follows well what one would expect by analyzing the charge state as well as the current and voltage. 
+
+\begin{figure}[h!]
 \centering	
 \includegraphics{mppt-1210-hus-2021-05-28T20:10:00.000Z-2021-05-29T02:19:00.000Z-librevskalman.pdf}
 \caption{\label{fig:librevskalman-mppt-hus} SoC libre.solar algorithm vs kalman-soc on device mppt-1210-hus}
 \end{figure}
 
+\pagebreak 
+
 \section{Dataset from EVLKpN of field test} 
 
-The dataset introduced in figure \ref{fig:librevskalman-mppt-1210-hus-all} was produced by real world usage during 13 days in a household in Africa. 
+The dataset introduced in figure \ref{fig:librevskalman-EVLKpN-all} was produced by real world usage during 13 days in an african household. The same graph can be seen more interactively \href{https://raw.githack.com/mulles/kalman-soc/main/data/EVLKpN_20210817-20210830_SOC_Graph.html}
+{here}.  
 
-\begin{figure}
+\begin{figure}[h!]
 \centering	
 \includegraphics[width=16cm]{EVLKpN_20210817-20210830-librevskalman-all.pdf}
-\caption{\label{fig:librevskalman-EVLKpN-all} SoC libre.solar algorithm vs kalman-soc on device EVLKpN in the field from from 2021/08/17 to 2021/08/30 }
+\caption{\label{fig:librevskalman-EVLKpN-all}  All measurements of device EVLKpN in the field from 2021/08/17 to 2021/08/30 }
 \end{figure}
 
+\pagebreak
 
-\begin{figure}
+In figure \ref{fig:librevskalman-EVLKpN} it is sure that the capacity is set correctly. When comparing both the kalman-soc performs much better, this is especially clear when one looks at the battery voltage, which is followed very well by the algorithm compared to the libre.solar algorithm. The libre.solar algorithm performs so poorly as it only updates SoC on current <0.2A corresponding roughly to OCV. 
+
+
+\begin{figure}[h!]
 \centering	
 \includegraphics{EVLKpN_20210817-20210830-librevskalman.pdf}
 \caption{\label{fig:librevskalman-EVLKpN} SoC libre.solar algorithm vs kalman-soc on device EVLKpN in the field from 2021/08/17 to 2021/08/30 }
 \end{figure}
-
 
 
 %\begin{pylabcode}
